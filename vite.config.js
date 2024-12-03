@@ -8,4 +8,11 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        host: 'plantaskr.local',
+        port: 5173,
+        hmr: {
+            host: 'plantaskr.local'
+        }
+    }
 });
