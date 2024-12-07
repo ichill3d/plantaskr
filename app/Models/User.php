@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -17,6 +18,7 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
+    use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
 
@@ -64,16 +66,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function ownedOrganizations()
+
+    public function organizationTeams()
     {
-        return $this->belongsToMany(Organization::class, 'organization_user', 'users_id', 'organizations_id')
-            ->wherePivot('organizations_roles_id', 1); // Filter by owner role
+        return $this->teams()->where('personal_team', false); // Filter non-personal teams
     }
 
-    public function organizations()
+    public function projects()
     {
-        return $this->belongsToMany(Organization::class, 'organization_user', 'users_id', 'organizations_id')
-            ->withPivot('organizations_roles_id')
+        return $this->belongsToMany(Project::class, 'project_user', 'users_id', 'projects_id')
+            ->withPivot('project_roles_id')
             ->withTimestamps();
     }
+
 }
