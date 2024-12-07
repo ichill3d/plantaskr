@@ -18,6 +18,11 @@ class Project extends Model
             ->withTimestamps();
     }
 
+    public function team()
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
     public function statusRelation()
     {
         return $this->hasOne(ProjectStatusRelation::class, 'projects_id');

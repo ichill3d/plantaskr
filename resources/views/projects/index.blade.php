@@ -14,7 +14,7 @@
             <tr>
 
                 <th>Name</th>
-                <th>Description</th>
+                <th>Organization</th>
                 <th>Created At</th>
                 <th>Created By</th>
                 <th>Status</th>
@@ -41,7 +41,7 @@
                     columns: [
                         // { data: 'id', name: 'id' },
                         { data: 'linkedName', name: 'linkedName' },
-                        { data: 'description', name: 'description' },
+                        { data: 'team', name: 'team' },
                         { data: 'created_at', name: 'created_at' },
                         { data: 'linkedOwner', name: 'linkedOwner' },
                         { data: 'projectStatus', name: 'projectStatus' },

@@ -6,26 +6,112 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-mark class="block h-9 w-auto" />
+                        plantaskr
+{{--                        <x-application-mark class="block h-9 w-auto" />--}}
                     </a>
                 </div>
 
+                <!-- Organization Name -->
+                @if (auth()->user()->currentTeam)
+                    <div class="relative ms-4 flex items-center text-gray-600 text-sm font-medium">
+
+                        <!-- Organization Name Link -->
+                        <a href="{{ route('organizations.dashboard', auth()->user()->currentTeam->id) }}" class="ms-4 flex items-center text-gray-600 text-sm font-medium">
+                            {{ auth()->user()->currentTeam->name }}
+                        </a>
+
+                        <!-- Dropdown Trigger -->
+                        <button id="org-dropdown-trigger" class="ml-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <svg class="h-4 w-4 transition" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div id="org-dropdown-menu" class="absolute top-9 left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible transition-opacity duration-200 z-50">
+                            <!-- Owned Teams -->
+                            <div class="px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
+                                Owned Teams
+                            </div>
+                            @php
+                                $ownTeams = \App\Models\Team::where('user_id', auth()->id())->with('owner')->get();
+                            @endphp
+                            @foreach ($ownTeams as $team)
+                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ $team->name }}
+                                </a>
+                            @endforeach
+
+                            <div class="border-t border-gray-200 my-1"></div>
+
+                            <!-- Teams You Are a Member Of -->
+                            <div class="px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
+                                Teams You Are a Member Of
+                            </div>
+                            @php
+                                $memberTeams = \App\Models\Team::whereHas('users', function ($query) {
+                                    $query->where('user_id', auth()->id());
+                                })->where('user_id', '!=', auth()->id())->with('owner')->get();
+                            @endphp
+                            @foreach ($memberTeams as $team)
+                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ $team->name }}
+                                </a>
+                            @endforeach
+
+                            <!-- Personal Space -->
+                            <a href="{{ route('personal.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Personal Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    @push('scripts')
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const trigger = $('#org-dropdown-trigger');
+                                const menu = $('#org-dropdown-menu');
+
+                                // Toggle dropdown on click
+                                trigger.click(function (e) {
+                                    e.stopPropagation(); // Prevent the click from bubbling up
+                                    menu.toggleClass('opacity-0 invisible opacity-100 visible');
+                                });
+
+                                // Close dropdown when clicking outside
+                                $(document).click(function () {
+                                    if (!menu.hasClass('invisible')) {
+                                        menu.addClass('opacity-0 invisible').removeClass('opacity-100 visible');
+                                    }
+                                });
+
+                                // Prevent dropdown from closing when interacting with it
+                                menu.click(function (e) {
+                                    e.stopPropagation();
+                                });
+                            });
+                        </script>
+                    @endpush
+
+                @endif
+
+
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                    <x-nav-link href="#">
+                        {{ __('Tasks') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('teams.index') }}" :active="request()->routeIs('teams.index')">
-                        {{ __('Organizations') }}
-                    </x-nav-link>
-                    <x-nav-link href="{{ route('projects.index') }}" :active="request()->routeIs('projects.index')">
+                    <x-nav-link href="{{ route('projects.index'/*, ['user_id' => auth()->id()]*/) }}" :active="request()->routeIs('projects.*')">
                         {{ __('Projects') }}
+                    </x-nav-link>
+                    <x-nav-link href="#">
+                        {{ __('Members') }}
+                    </x-nav-link>
+                    <x-nav-link href="#">
+                        {{ __('Reports') }}
                     </x-nav-link>
                 </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
                     <x-dropdown align="right" width="48">
@@ -57,17 +143,9 @@
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
-                            <x-dropdown-link href="{{ route('teams.index') }}">
+                            <x-dropdown-link href="{{ route('organizations.index') }}">
                                 {{ __('Organizations') }}
                             </x-dropdown-link>
-
-                            @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                                <x-dropdown-link href="{{ route('api-tokens.index') }}">
-                                    {{ __('API Tokens') }}
-                                </x-dropdown-link>
-                            @endif
-
-                            <div class="border-t border-gray-200"></div>
 
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}" x-data>
@@ -98,57 +176,18 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            <x-responsive-nav-link href="#">
+                {{ __('Tasks') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('teams.index') }}" :active="request()->routeIs('teams.index')">
-                {{ __('Organizations') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('projects.index') }}" :active="request()->routeIs('projects.index')">
+            <x-responsive-nav-link href="{{ route('projects.index') }}" :active="request()->routeIs('projects.*')">
                 {{ __('Projects') }}
             </x-responsive-nav-link>
-
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="flex items-center px-4">
-                @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                    <div class="shrink-0 me-3">
-                        <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                    </div>
-                @endif
-
-                <div>
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <!-- Account Management -->
-                <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                    <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')">
-                        {{ __('API Tokens') }}
-                    </x-responsive-nav-link>
-                @endif
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}" x-data>
-                    @csrf
-
-                    <x-responsive-nav-link href="{{ route('logout') }}"
-                                           @click.prevent="$root.submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-
-
-            </div>
+            <x-responsive-nav-link href="#">
+                {{ __('Members') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="#">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
         </div>
     </div>
 </nav>

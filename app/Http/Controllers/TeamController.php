@@ -42,6 +42,10 @@ class TeamController extends Controller
 
     public function dashboard(Team $team)
     {
+        $user = auth()->user();
+        $user->current_team_id = $team->id;
+        $user->save();
+
         return view('teams.dashboard', compact('team'));
     }
 
