@@ -96,7 +96,7 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="#">
+                    <x-nav-link href="{{ route('tasks.index'/*, ['user_id' => auth()->id()]*/) }}" :active="request()->routeIs('tasks.*')">
                         {{ __('Tasks') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('projects.index'/*, ['user_id' => auth()->id()]*/) }}" :active="request()->routeIs('projects.*')">

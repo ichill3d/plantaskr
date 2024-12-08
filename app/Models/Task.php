@@ -35,7 +35,9 @@ class Task extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'task_users', 'task_id', 'user_id');
+        return $this->belongsToMany(User::class, 'task_users', 'tasks_id', 'users_id')
+            ->withPivot('role_id') // Include the role_id in the pivot
+            ->withTimestamps();
     }
 
     public function labels()
@@ -51,5 +53,26 @@ class Task extends Model
     public function attachments()
     {
         return $this->hasMany(TaskAttachment::class, 'task_id');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'project_id' => 'required|exists:projects,id',
+            'task_status_id' => 'required|exists:task_status,id',
+            'task_priorities_id' => 'required|exists:task_priorities,id',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        $task = Task::create($validated);
+
+        if ($request->has('user_ids')) {
+            $task->users()->sync($request->input('user_ids'));
+        }
+
+        return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
 }
