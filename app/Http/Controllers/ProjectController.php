@@ -10,6 +10,37 @@ use App\Models\ProjectStatusRelation;
 
 class ProjectController extends Controller
 {
+    private function getNavItems(Project $project): array
+    {
+        return [
+            [
+                'label' => __('Overview'),
+                'route' => route('projects.show', $project->id),
+                'active' => 'projects.show',
+            ],
+            [
+                'label' => __('Discussion'),
+                'route' => route('projects.discussion', $project->id),
+                'active' => 'projects.projects',
+            ],
+            [
+                'label' => __('Tasks'),
+                'route' => route('projects.tasks', $project->id),
+                'active' => 'projects.tasks',
+            ],
+            [
+                'label' => __('Milestones'),
+                'route' => route('projects.milestones', $project->id),
+                'active' => 'projects.milestones',
+            ],
+            [
+                'label' => __('Members'),
+                'route' => route('projects.members', $project->id),
+                'active' => 'projects.members',
+            ],
+
+        ];
+    }
     public function index()
     {
         $projects = Project::all();
@@ -53,7 +84,8 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        return view('projects.show', compact('project'));
+        $navItems = $this->getNavItems($project);
+        return view('projects.show', compact('project',  'navItems'));
     }
 
     public function edit(Project $project)
@@ -96,7 +128,6 @@ class ProjectController extends Controller
                 : auth()->user()->current_team_id;
         }
 
-
         $projects = Project::select([
             'id',
             'name',
@@ -118,45 +149,69 @@ class ProjectController extends Controller
             $projects->where('team_id', $team_id);
         }
 
+        $includeTeamColumn = !$team_id;
+
 //        $projects = $projects->get(); // Execute the query
 //        dd($projects->toArray());
 
-        return datatables()->of($projects)
+        $dataTable = datatables()->of($projects)
             ->addColumn('action', function ($row) {
-                return '<a href="/projects/' . $row->id . '" class="btn btn-sm btn-primary">View</a>';
+                return '<a href="/projects/' . $row->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                    View
+                </a>';
             })
             ->addColumn('linkedName', function ($row) {
-                return '<a href="/projects/' . $row->id . '" class="btn btn-sm btn-primary">' . $row->name . '</a>';
+                return '<a href="/projects/' . $row->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                    ' . $row->name . '
+                </a>';
             })
             ->addColumn('linkedOwner', function ($row) {
                 $owner = $row->users->firstWhere('pivot.project_roles_id', 1);
                 return $owner
-                    ? '<a href="/user/' . $owner->id . '" class="btn btn-sm btn-primary">' . $owner->name . '</a>'
-                    : '<span class="text-muted">No Owner</span>';
+                    ? '<a href="/user/' . $owner->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                    ' . $owner->name . '
+                </a>'
+                    : '<span class="text-gray-400 italic">No Owner</span>';
             })
-
             ->addColumn('projectStatus', function ($row) {
                 $status = $row->statusRelation?->status;
                 return $status
-                    ? $status->name
-                    : '<span class="text-muted">No Status</span>';
+                    ? '<span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-lg">' . $status->name . '</span>'
+                    : '<span class="text-gray-400 italic">No Status</span>';
             })
-            ->addColumn('team', function ($row) {
-                if ($row->team) {
-                    return '<a href="/organizations/' . $row->team->id . '" class="btn btn-sm btn-secondary">' . $row->team->name . '</a>';
-                }
-                return '<span class="text-muted">[Personal Project]</span>';
-            })
+
             ->editColumn('created_at', function ($project) {
                 return \Carbon\Carbon::parse($project->created_at)->format('d.m.Y H:i:s');
             })
-            ->rawColumns(['action', 'linkedName', 'linkedOwner', 'projectStatus', 'team'])
-            ->make(true);
+            ->rawColumns(['action', 'linkedName', 'linkedOwner', 'projectStatus', 'team']);
+
+        if (!$team_id) {
+            $dataTable->addColumn('team', function ($row) {
+                if ($row->team) {
+                    return '<a href="/organizations/' . $row->team->id . '"
+                       class="text-purple-500 hover:text-purple-600 hover:underline transition">
+                        ' . $row->team->name . '
+                    </a>';
+                }
+                return '<span class="text-gray-400 italic">[Personal Project]</span>';
+            });
+            $dataTable->rawColumns(['team']);
+        }
+
+        return $dataTable->make(true);
+
     }
 
 
     public function discussion(Project $project)
     {
-        return view('projects.discussion', compact('project'));
+        $navItems = $this->getNavItems($project);
+        return view('projects.discussion', compact('project','navItems'));
+    }
+
+    public function tasks(Project $project)
+    {
+        $navItems = $this->getNavItems($project);
+        return view('projects.tasks', compact('project', 'navItems'));
     }
 }

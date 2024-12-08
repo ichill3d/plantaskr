@@ -16,7 +16,7 @@ Route::get('/my-organizations', [TeamController::class, 'listUserTeams'])->name(
 Route::middleware(['auth'])->group(function () {
     // Nested routes for organizations
     Route::prefix('organizations/{team}')->group(function () {
-        Route::get('dashboard', [TeamController::class, 'dashboard'])->name('organizations.dashboard');
+        Route::get('overview', [TeamController::class, 'overview'])->name('organizations.overview');
         Route::get('projects', [TeamController::class, 'projects'])->name('organizations.projects');
         Route::get('members', [TeamController::class, 'members'])->name('organizations.members');
     });
@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
 
 // API routes
 Route::get('/api/projects', [ProjectController::class, 'getProjects'])->name('projects.api');
+Route::get('/api/tasks', [TaskController::class, 'getTasks'])->name('tasks.api');
 
 // Default authentication routes
 Route::middleware([

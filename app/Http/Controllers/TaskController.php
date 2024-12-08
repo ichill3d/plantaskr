@@ -93,7 +93,7 @@ class TaskController extends Controller
         // Add additional assigned users if provided
         if ($request->has('user_ids')) {
             foreach ($request->input('user_ids') as $userId) {
-                $syncData[$userId] = ['role_id' => null]; // Default to no specific role
+                $syncData[$userId] = ['role_id' => 2]; // Default to no specific role
             }
         }
 
@@ -101,6 +101,82 @@ class TaskController extends Controller
 
         return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
+
+    public function getTasks(Request $request)
+    {
+        $team_id = $request->input('team_id') ?? auth()->user()->current_team_id;
+        $user_id = $request->input('user_id') ?? auth()->id();
+        $project_id = $request->input('project_id');
+
+        // Base query for tasks
+        $tasks = Task::select([
+            'tasks.id',
+            'tasks.name',
+            'tasks.description',
+            'tasks.project_id',
+            'tasks.task_status_id',
+            'tasks.created_at',
+        ])
+            ->with(['project.team', 'status', 'users']); // Add relationships
+
+        // Filter by user_id (if provided)
+        if (isset($user_id)) {
+            $tasks->whereHas('users', function ($q) use ($user_id) {
+                $q->where('users.id', $user_id);
+            });
+        }
+
+        // Filter by team_id (if provided)
+        if ($team_id) {
+            $tasks->whereHas('project', function ($q) use ($team_id) {
+                $q->where('team_id', $team_id);
+            });
+        }
+
+        // Filter by project_id (if provided)
+        if ($project_id) {
+            $tasks->where('project_id', $project_id);
+        }
+
+        // Datatables processing
+        $dataTable = datatables()->of($tasks)
+            ->addColumn('action', function ($row) {
+                return '<a href="/tasks/' . $row->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                View
+            </a>';
+            })
+            ->addColumn('linkedName', function ($row) {
+                return '<a href="/tasks/' . $row->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                ' . $row->name . '
+            </a>';
+            })
+            ->addColumn('linkedProject', function ($row) {
+                return '<a href="/projects/' . $row->project->id . '" class="text-purple-500 hover:text-purple-600 hover:underline transition">
+                ' . $row->project->name . '
+            </a>';
+            })
+            ->addColumn('linkedAssignees', function ($row) {
+                return $row->users->map(function ($user) {
+                    return '<a href="/users/' . $user->id . '" class="text-blue-500 hover:text-blue-600 hover:underline transition">
+                    ' . $user->name . '
+                </a>';
+                })->implode(', ');
+            })
+            ->addColumn('taskStatus', function ($row) {
+                return $row->status
+                    ? '<span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-lg">' . $row->status->name . '</span>'
+                    : '<span class="text-gray-400 italic">No Status</span>';
+            })
+            ->editColumn('created_at', function ($task) {
+                return \Carbon\Carbon::parse($task->created_at)->format('d.m.Y H:i:s');
+            })
+            ->rawColumns(['action', 'linkedName', 'linkedProject', 'linkedAssignees', 'taskStatus']);
+
+        return $dataTable->make(true);
+    }
+
+
+
 
 
 }

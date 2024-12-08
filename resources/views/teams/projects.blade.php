@@ -1,10 +1,20 @@
-@extends('teams.dashboard')
+@extends('layouts.dashboard')
+
+@section('navTitle')
+{{ __('Organization') }}
+@endsection
+
+@section('dashboadHeaderTitle')
+    {{ $team->name }} → {{ __('Projects') }}
+@endsection
 
 @section('content')
-    <h1 class="text-2xl font-bold">Organization Projects</h1>
-    <ul>
-        @foreach ($projects as $project)
-            <li>{{ $project->name }} - {{ $project->description }}</li>
-        @endforeach
-    </ul>
+    @include('components.dashboard-header', [
+          'title' => 'Projects',
+          'action' => [
+              'url' => route('projects.create'),
+              'label' => 'Add New Project'
+          ]
+      ])
+    <x-project-list ajax-url="{{ route('projects.api') }}" />
 @endsection

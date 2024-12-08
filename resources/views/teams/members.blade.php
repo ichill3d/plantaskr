@@ -1,4 +1,4 @@
-@extends('teams.dashboard')
+@extends('layouts.organization')
 
 @section('content')
     <h1 class="text-2xl font-bold">Organization Members</h1>

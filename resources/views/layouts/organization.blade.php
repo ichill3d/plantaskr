@@ -3,13 +3,12 @@
         <!-- Sidebar -->
         <aside class="w-1/5 bg-white shadow-md">
             <div class="p-4">
-                <h2 class="text-lg font-bold text-gray-800">Organizations</h2>
-                <nav class="mt-4">
+                <nav class="">
                     <ul>
                         <li class="mb-2">
-                            <a href="{{ route('organizations.dashboard', $team->id) }}"
+                            <a href="{{ route('organizations.overview', $team->id) }}"
                                class="block px-4 py-2 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-800">
-                                Dashboard
+                                Overview
                             </a>
                         </li>
                         <li class="mb-2">
@@ -30,14 +29,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Organization: {{ $team->name }}</h1>
-                <a href="#"
-                   class="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600">
-                    Add New Project
-                </a>
-            </header>
+        <main class="flex-1 p-2">
             <div class="bg-white p-6 rounded shadow">
                 @yield('content')
             </div>

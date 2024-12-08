@@ -16,7 +16,7 @@
                     <div class="relative ms-4 flex items-center text-gray-600 text-sm font-medium">
 
                         <!-- Organization Name Link -->
-                        <a href="{{ route('organizations.dashboard', auth()->user()->currentTeam->id) }}" class="ms-4 flex items-center text-gray-600 text-sm font-medium">
+                        <a href="{{ route('organizations.overview', auth()->user()->currentTeam->id) }}" class="ms-4 flex items-center text-gray-600 text-sm font-medium">
                             {{ auth()->user()->currentTeam->name }}
                         </a>
 
@@ -36,7 +36,7 @@
                                 $ownTeams = \App\Models\Team::where('user_id', auth()->id())->with('owner')->get();
                             @endphp
                             @foreach ($ownTeams as $team)
-                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <a href="{{ route('organizations.overview', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     {{ $team->name }}
                                 </a>
                             @endforeach
@@ -53,7 +53,7 @@
                                 })->where('user_id', '!=', auth()->id())->with('owner')->get();
                             @endphp
                             @foreach ($memberTeams as $team)
-                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <a href="{{ route('organizations.overview', $team->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     {{ $team->name }}
                                 </a>
                             @endforeach

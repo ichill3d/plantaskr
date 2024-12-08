@@ -14,14 +14,14 @@
                     <div class="bg-white shadow rounded-lg overflow-hidden">
                         <div class="px-6 py-4">
                             <h2 class="text-lg font-semibold">
-                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="text-blue-600 hover:underline font-medium">
+                                <a href="{{ route('organizations.overview', $team->id) }}" class="text-blue-600 hover:underline font-medium">
                                     {{ $team->name }}
                                 </a>
                             </h2>
                             <p class="text-gray-600">Owned by: {{ $team->owner->name }}</p>
                         </div>
                         <div class="bg-gray-100 px-6 py-4 flex justify-end items-center">
-                            <a href="{{ route('organizations.dashboard', $team->id) }}" class="text-blue-600 hover:underline font-medium">
+                            <a href="{{ route('organizations.overview', $team->id) }}" class="text-blue-600 hover:underline font-medium">
                                 View
                             </a>
                         </div>
@@ -36,14 +36,14 @@
                     <div class="bg-white shadow rounded-lg overflow-hidden">
                         <div class="px-6 py-4">
                             <h2 class="text-lg font-semibold">
-                                <a href="{{ route('organizations.dashboard', $team->id) }}" class="text-blue-600 hover:underline font-medium">
+                                <a href="{{ route('organizations.overview', $team->id) }}" class="text-blue-600 hover:underline font-medium">
                                     {{ $team->name }}
                                 </a>
                             </h2>
                             <p class="text-gray-600">Owned by: {{ $team->owner->name }}</p>
                         </div>
                         <div class="bg-gray-100 px-6 py-4 flex justify-end items-center">
-                            <a href="{{ route('organizations.dashboard', $team->id) }}" class="text-blue-600 hover:underline font-medium">
+                            <a href="{{ route('organizations.overview', $team->id) }}" class="text-blue-600 hover:underline font-medium">
                                 View
                             </a>
                         </div>
