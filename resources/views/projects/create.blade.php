@@ -1,4 +1,7 @@
-<x-app-layout>
+@extends('layouts.sections.organization')
+
+
+@section('content')
     <div class="container mx-auto py-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Create Project</h1>
 
@@ -24,7 +27,6 @@
                 <label for="team_id" class="block text-sm font-medium text-gray-700">Attach to Team (Optional)</label>
                 <select name="team_id" id="team_id"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">No Team</option>
                     @foreach ($teams as $team)
                         <option value="{{ $team->id }}">{{ $team->name }}</option>
                     @endforeach
@@ -40,4 +42,6 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+@endsection
+
+

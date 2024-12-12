@@ -10,78 +10,79 @@ class TeamController extends Controller
         return [
             [
                 'label' => __('Overview'),
-                'route' => route('organizations.overview', $team->id),
+                'route' => route('organizations.overview', ['id' => $team->id, 'organization_alias' => $team->alias]),
                 'active' => 'organizations.overview',
             ],
             [
                 'label' => __('Projects'),
-                'route' => route('organizations.projects', $team->id),
+                'route' => route('organizations.projects', ['id' => $team->id, 'organization_alias' => $team->alias]),
                 'active' => 'organizations.projects',
             ],
             [
                 'label' => __('Members'),
-                'route' => route('organizations.members', $team->id),
+                'route' => route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]),
                 'active' => 'organizations.members',
             ],
         ];
     }
-    public function ownTeams()
-    {
-        $teams = Team::where('user_id', auth()->id())->with('owner')->get(); // Filter by owner and include owner details
-        return $teams;
-    }
 
     public function showTeam($id)
     {
-        $team = Team::where('id', $id)
-            ->firstOrFail(); // Retrieve the team or throw a 404 error
+        $team = Team::where('id', $id)->firstOrFail();
         return view('teams.show', compact('team'));
     }
 
-
-
-    public function memberTeams()
+    public function overview($id, $organization_alias)
     {
-        $userId = auth()->id();
+        $team = Team::where('id', $id)->firstOrFail();
 
-        $teams = Team::whereHas('users', function ($query) use ($userId) {
-            $query->where('user_id', $userId); // User is in team_user
-        })->where('user_id', '!=', $userId) // User is not the owner
-        ->with('owner') // Optionally eager load the owner
-        ->get();
-        return $teams;
-    }
-    public function listUserTeams()
-    {
-        $ownTeams = $this->ownTeams();
-        $memberTeams = $this->memberTeams();
-        return view('teams.index', compact('ownTeams', 'memberTeams'));
-    }
+        auth()->user()->update(['current_team_id' => $team->id]);
 
-    public function overview(Team $team)
-    {
-        $user = auth()->user();
-        $user->current_team_id = $team->id;
-        $user->save();
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+
+            return redirect()->route('organizations.overview', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+
+
+
         $navItems = $this->getNavItems($team);
-        return view('teams.overview', compact('team',  'navItems'));
+        return view('teams.overview', compact('team', 'navItems'));
     }
 
-    public function projects(Team $team)
+    public function projects($id, $organization_alias)
     {
-        $projects = $team->projects; // Assuming a `hasMany` relationship
-        $navItems = $this->getNavItems($team);
-        return view('teams.projects', compact('team', 'projects','navItems'));
+        $team = Team::where('id', $id)->firstOrFail();
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.projects', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+
+        $projects = $team->projects;
+        return view('teams.projects', compact('team', 'projects'));
     }
 
-    public function members(Team $team)
+    public function members($id, $organization_alias)
     {
-        $members = $team->members; // Assuming a `belongsToMany` relationship
+        $team = Team::where('id', $id)->firstOrFail();
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.members', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+
+        $members = $team->members;
         $navItems = $this->getNavItems($team);
-        return view('teams.members', compact('team', 'members',  'navItems'));
+        return view('teams.members', compact('team', 'members', 'navItems'));
     }
-
-
-
-
 }

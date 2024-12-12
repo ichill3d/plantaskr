@@ -14,5 +14,26 @@
           ]
       ])
 
-    <x-task-list ajax-url="{{ route('tasks.api', ['project_id' => $project->id]) }}" />
+    <livewire:table-view
+        :model="'App\Models\Task'"
+        :columns="[
+        ['key' => 'id', 'label' => 'ID'],
+        ['key' => 'name', 'label' => 'Name'],
+        ['key' => 'description', 'label' => 'Description'],
+        ['key' => 'created_at', 'label' => 'Created At']
+    ]"
+        :dataType="'tasks'"
+        :team="['id' => 7, 'alias' => 'asdasfasf']"
+    />
+    <button id="reloadTableButton" class="bg-blue-500 text-white px-4 py-2 rounded">Reload Table</button>
+
+
+    @livewireScripts
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            $('#reloadTableButton').on('click', function () {
+                Livewire.dispatch('reloadTable');
+            });
+        });
+    </script>
 @endsection

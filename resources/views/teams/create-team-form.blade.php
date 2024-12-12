@@ -26,6 +26,7 @@
             <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" autofocus />
             <x-input-error for="name" class="mt-2" />
         </div>
+
     </x-slot>
 
     <x-slot name="actions">

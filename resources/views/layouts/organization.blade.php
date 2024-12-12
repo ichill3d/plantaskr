@@ -6,19 +6,19 @@
                 <nav class="">
                     <ul>
                         <li class="mb-2">
-                            <a href="{{ route('organizations.overview', $team->id) }}"
+                            <a href="{{ route('organizations.overview', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
                                class="block px-4 py-2 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-800">
                                 Overview
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{{ route('organizations.projects', $team->id) }}"
+                            <a href="{{ route('organizations.projects', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
                                class="block px-4 py-2 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-800">
                                 Projects
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{{ route('organizations.members', $team->id) }}"
+                            <a href="{{ route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
                                class="block px-4 py-2 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-800">
                                 Members
                             </a>

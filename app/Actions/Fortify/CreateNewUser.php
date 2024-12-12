@@ -15,7 +15,7 @@ class CreateNewUser implements CreatesNewUsers
     use PasswordValidationRules;
 
     /**
-     * Create a newly registered user.
+     * Create a newly registered user and their personal team.
      *
      * @param  array<string, string>  $input
      */
@@ -29,11 +29,17 @@ class CreateNewUser implements CreatesNewUsers
         ])->validate();
 
         return DB::transaction(function () use ($input) {
-            return User::create([
+            // Create the user
+            $user = User::create([
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
             ]);
+
+            // Chain to create their personal team
+            $this->createTeam($user);
+
+            return $user; // Return the created user
         });
     }
 
@@ -42,10 +48,12 @@ class CreateNewUser implements CreatesNewUsers
      */
     protected function createTeam(User $user): void
     {
+        $teamName = explode(' ', $user->name, 2)[0] . "'s Team";
         $user->ownedTeams()->save(Team::forceCreate([
             'user_id' => $user->id,
-            'name' => explode(' ', $user->name, 2)[0]."'s Team",
+            'name' => $teamName,
             'personal_team' => true,
+            'alias' => slugify($teamName) . "-" . $user->id, // Example: Use user ID as alias
         ]));
     }
 }

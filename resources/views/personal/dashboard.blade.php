@@ -1,5 +1,9 @@
-<x-app-layout>
-    <h1>Personal Dashboard</h1>
-    <p>asdf</p>
+@extends('layouts.sections.user')
 
-</x-app-layout>
+@section('content')
+    {{--    @include('components.dashboard-header', [--}}
+    {{--           'title' => 'Organization Overview',--}}
+    {{--           'action' => null--}}
+    {{--       ])--}}
+    overview page
+@endsection

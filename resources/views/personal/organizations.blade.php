@@ -1,4 +1,12 @@
-<x-app-layout>
+@extends('layouts.sections.user')
+
+@section('content')
+    {{--    @include('components.dashboard-header', [--}}
+    {{--           'title' => 'Organization Overview',--}}
+    {{--           'action' => null--}}
+    {{--       ])--}}
+
+
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Add Organization Button -->
@@ -12,7 +20,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                @foreach ($ownTeams as $team)
+
+                @forelse ($ownTeams as $team)
                     <div class="bg-white shadow rounded-lg overflow-hidden">
                         <div class="px-6 py-4">
                             <h2 class="text-lg font-semibold">
@@ -30,13 +39,16 @@
                             </a>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <p>No elements found in the array.</p>
+                @endforelse
             </div>
 
+
+                @forelse ($memberTeams as $team) ($memberTeams as $team)
             <h1 class="text-2xl font-bold mb-6">Organizations you are a member of</h1>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($memberTeams as $team)
                     <div class="bg-white shadow rounded-lg overflow-hidden">
                         <div class="px-6 py-4">
                             <h2 class="text-lg font-semibold">
@@ -54,8 +66,13 @@
                             </a>
                         </div>
                     </div>
-                @endforeach
             </div>
+                @empty
+
+                @endforelse
+
+
         </div>
     </div>
-</x-app-layout>
+
+@endsection

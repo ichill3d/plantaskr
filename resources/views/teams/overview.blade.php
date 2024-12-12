@@ -1,17 +1,9 @@
-@extends('layouts.dashboard')
-
-@section('navTitle')
-    {{ __('Organization') }}
-@endsection
-
-@section('dashboadHeaderTitle')
-    {{ $team->name }} → {{ __('Overview') }}
-@endsection
+@extends('layouts.sections.organization')
 
 @section('content')
-    @include('components.dashboard-header', [
-           'title' => 'Organization Overview',
-           'action' => null
-       ])
-    test
+{{--    @include('components.dashboard-header', [--}}
+{{--           'title' => 'Organization Overview',--}}
+{{--           'action' => null--}}
+{{--       ])--}}
+    overview page
 @endsection

@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str; // Import the Str helper
 use Laravel\Jetstream\Contracts\CreatesTeams;
 use Laravel\Jetstream\Events\AddingTeam;
 use Laravel\Jetstream\Jetstream;
@@ -19,6 +20,7 @@ class CreateTeam implements CreatesTeams
      */
     public function create(User $user, array $input): Team
     {
+
         Gate::forUser($user)->authorize('create', Jetstream::newTeamModel());
 
         Validator::make($input, [
@@ -29,9 +31,32 @@ class CreateTeam implements CreatesTeams
 
         $user->switchTeam($team = $user->ownedTeams()->create([
             'name' => $input['name'],
+            'alias' => $this->generateUniqueAlias($input['name']),
             'personal_team' => false,
         ]));
 
         return $team;
+    }
+
+    /**
+     * Generate a unique alias for the team.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function generateUniqueAlias($name)
+    {
+        // Slugify the name
+        $baseAlias = Str::slug($name);
+        $alias = $baseAlias;
+        $counter = 1;
+
+        // Check for uniqueness and append a counter if needed
+        while (Team::where('alias', $alias)->exists()) {
+            $alias = "{$baseAlias}-{$counter}";
+            $counter++;
+        }
+
+        return $alias;
     }
 }

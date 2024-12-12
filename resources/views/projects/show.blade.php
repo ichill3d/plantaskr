@@ -1,16 +1,8 @@
-@extends('layouts.dashboard')
-@section('navTitle')
-    {{ __('Project') }}
-@endsection
-@section('dashboadHeaderTitle')
-    <span class="text-gray-800">{{ $project->name }}</span> — {{ __('Overview') }}
-@endsection
+@extends('layouts.sections.organization')
+
 @section('content')
-    @include('components.dashboard-header', [
-          'action' => [
-              'url' => route('tasks.create'),
-              'label' => 'Add New Task'
-          ]
-      ])
+
+    <livewire:create-task :currentTeamId="$team->id" />
+
     <p>{{ $project->description }}</p>
 @endsection
