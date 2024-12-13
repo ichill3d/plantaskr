@@ -26,7 +26,25 @@ class TableView extends Component
 
     public function loadData()
     {
-        $this->data = app($this->model)::all();
+        switch ($this->dataType) {
+            case 'projects': {
+                $this->data = app($this->model)::where('team_id', $this->team['id'])->get();
+                break;
+            }
+            case 'users': {
+                $this->data = $this->team->users;
+                break;
+            }
+            case 'tasks': {
+                $this->data = $this->team->tasks;
+                break;
+            }
+            default: {
+                $this->data = app($this->model)::all();
+                break;
+            }
+        }
+
     }
 
 

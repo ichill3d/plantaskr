@@ -67,6 +67,8 @@ class User extends Authenticatable
         ];
     }
 
+
+
     public function organizationTeams()
     {
         return $this->teams()->where('personal_team', false); // Filter non-personal teams

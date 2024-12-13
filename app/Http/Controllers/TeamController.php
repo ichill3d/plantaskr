@@ -1,30 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\Team;
 
 class TeamController extends Controller
 {
-    private function getNavItems(Team $team): array
-    {
-        return [
-            [
-                'label' => __('Overview'),
-                'route' => route('organizations.overview', ['id' => $team->id, 'organization_alias' => $team->alias]),
-                'active' => 'organizations.overview',
-            ],
-            [
-                'label' => __('Projects'),
-                'route' => route('organizations.projects', ['id' => $team->id, 'organization_alias' => $team->alias]),
-                'active' => 'organizations.projects',
-            ],
-            [
-                'label' => __('Members'),
-                'route' => route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]),
-                'active' => 'organizations.members',
-            ],
-        ];
-    }
 
     public function showTeam($id)
     {
@@ -47,15 +28,14 @@ class TeamController extends Controller
             ], 301);
         }
 
-
-
-        $navItems = $this->getNavItems($team);
-        return view('teams.overview', compact('team', 'navItems'));
+        return view('teams.overview', compact('team'));
     }
 
     public function projects($id, $organization_alias)
     {
         $team = Team::where('id', $id)->firstOrFail();
+
+
 
         // Redirect to the correct URL if the alias doesn't match
         if ($team->alias !== $organization_alias) {
@@ -65,8 +45,7 @@ class TeamController extends Controller
             ], 301);
         }
 
-        $projects = $team->projects;
-        return view('teams.projects', compact('team', 'projects'));
+        return view('teams.projects', compact('team'));
     }
 
     public function members($id, $organization_alias)
@@ -82,7 +61,49 @@ class TeamController extends Controller
         }
 
         $members = $team->members;
-        $navItems = $this->getNavItems($team);
-        return view('teams.members', compact('team', 'members', 'navItems'));
+        return view('teams.members', compact('team', 'members'));
     }
+     public function tasks($id, $organization_alias)
+    {
+        $team = Team::where('id', $id)->firstOrFail();
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.members', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+
+        $tasks = $team->tasks;
+        return view('teams.tasks', compact('team', 'tasks'));
+    }
+
+    public function membersManagement($id, $organization_alias)
+    {
+        $team = Team::where('id', $id)->firstOrFail();
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.members', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+        return view('teams.members-management', compact('team'));
+    }
+    public function settings($id, $organization_alias)
+    {
+        $team = Team::where('id', $id)->firstOrFail();
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.members', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+        return view('teams.settings', compact('team'));
+    }
+
 }

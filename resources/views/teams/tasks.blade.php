@@ -1,22 +1,24 @@
 @extends('layouts.sections.organization')
 
+
 @section('content')
     @include('components.dashboard-header', [
-          'title' => 'Members',
+          'title' => 'Tasks',
           'action' => [
-              'url' => route('organizations.members.management', ['id' => $team->id, 'organization_alias' => $team->alias]),
-              'label' => 'Manage Members'
+              'url' => route('organizations.create-project', ['id' => $team->id, 'organization_alias' => $team->alias]),
+              'label' => 'Create Task'
           ]
       ])
     {{--    <x-project-list ajax-url="{{ route('projects.api') }}" />--}}
     <livewire:table-view
-        :model="'App\\Models\\User'"
+        :model="'App\\Models\\Task'"
         :columns="[
+        ['key' => 'id', 'label' => 'ID'],
         ['key' => 'name', 'label' => 'Name'],
-        ['key' => 'email', 'label' => 'Email'],
-        ['key' => 'status', 'label' => 'Status']
+        ['key' => 'description', 'label' => 'Description'],
+        ['key' => 'created_at', 'label' => 'Created At']
     ]"
-        :dataType="'members'"
+        :dataType="'tasksWithoutProject'"
         :team="['id' => $team->id, 'alias' => $team->alias]"
     />
 {{--    <button id="reloadTableButton" class="bg-blue-500 text-white px-4 py-2 rounded">Reload Table</button>--}}

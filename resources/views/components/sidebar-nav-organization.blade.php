@@ -12,9 +12,25 @@
     </li>
     <li>
         <x-side-menu-item
+            label="Tasks"
+            link="{{ route('organizations.tasks', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+    </li>
+    <li>
+        <x-side-menu-item
             label="Members"
             link="{{ route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
     </li>
+    <li>
+        <x-side-menu-item
+            label="Members Management"
+            link="{{ route('organizations.members.management', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+    </li>
+    <li>
+        <x-side-menu-item
+            label="Settings"
+            link="{{ route('organizations.settings', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+    </li>
+
 
 
 

@@ -21,6 +21,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/overview', [TeamController::class, 'overview'])->name('organizations.overview');
         Route::get('/members', [TeamController::class, 'members'])->name('organizations.members');
         Route::get('/create-project', [ProjectController::class, 'create'])->name('organizations.create-project');
+        Route::get('/members-management', [TeamController::class, 'membersManagement'])->name('organizations.members.management');
+        Route::get('/settings', [TeamController::class, 'settings'])->name('organizations.settings');
+        Route::get('/tasks', [TeamController::class, 'tasks'])->name('organizations.tasks');
 
         // Nested project routes within organizations
         Route::prefix('projects')->group(function () {
@@ -30,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{project_id}/tasks', [ProjectController::class, 'tasks'])->name('organizations.projects.tasks');
             Route::get('{project_id}/milestones', [ProjectController::class, 'milestones'])->name('organizations.projects.milestones');
             Route::get('{project_id}/members', [ProjectController::class, 'members'])->name('organizations.projects.members');
+
 
         });
     });
