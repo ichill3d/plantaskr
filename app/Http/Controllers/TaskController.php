@@ -32,8 +32,9 @@ class TaskController extends Controller
 
         return view('tasks.index', compact('tasks'));
     }
-    public function show(Task $task)
+    public function show($task_id)
     {
+        $task = Task::where('id', $task_id)->firstOrFail();
         $task->load(['project', 'status', 'priority', 'users', 'labels', 'links.type', 'attachments']);
 
         return view('tasks.show', compact('task'));

@@ -18,25 +18,29 @@ Route::middleware(['auth'])->group(function () {
 
     // Nested routes for organizations
     Route::prefix('{id}/{organization_alias}')->group(function () {
+        // General Organization Routes
         Route::get('/overview', [TeamController::class, 'overview'])->name('organizations.overview');
         Route::get('/members', [TeamController::class, 'members'])->name('organizations.members');
         Route::get('/create-project', [ProjectController::class, 'create'])->name('organizations.create-project');
         Route::get('/members-management', [TeamController::class, 'membersManagement'])->name('organizations.members.management');
         Route::get('/settings', [TeamController::class, 'settings'])->name('organizations.settings');
-        Route::get('/tasks', [TeamController::class, 'tasks'])->name('organizations.tasks');
 
-        // Nested project routes within organizations
+        // Tasks Routes
+        Route::prefix('tasks')->group(function () {
+            Route::get('/', [TeamController::class, 'tasks'])->name('organizations.tasks');
+            Route::get('/view/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
+        });
+
+        // Projects Routes
         Route::prefix('projects')->group(function () {
-            Route::get('/', [TeamController::class, 'projects'])->name('organizations.projects');
-            Route::get('{project_id}', [ProjectController::class, 'show'])->name('organizations.projects.show');
-            Route::get('{project_id}/discussion', [ProjectController::class, 'discussion'])->name('organizations.projects.discussion');
-            Route::get('{project_id}/tasks', [ProjectController::class, 'tasks'])->name('organizations.projects.tasks');
-            Route::get('{project_id}/milestones', [ProjectController::class, 'milestones'])->name('organizations.projects.milestones');
-            Route::get('{project_id}/members', [ProjectController::class, 'members'])->name('organizations.projects.members');
+            Route::get('/', [TeamController::class, 'projects'])->name('organizations.projects'); // List all projects
 
-
+            Route::get('{project_id}/{tab?}', [ProjectController::class, 'show'])
+                ->where('tab', 'overview|discussion|files|tasks|milestones|members|settings') // Limit valid tabs
+                ->name('organizations.projects.show');
         });
     });
+
 });
 
 // Resource routes for projects and tasks (optional for other contexts)

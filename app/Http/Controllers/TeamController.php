@@ -65,7 +65,7 @@ class TeamController extends Controller
     }
      public function tasks($id, $organization_alias)
     {
-        $team = Team::where('id', $id)->firstOrFail();
+        $team = Team::find( $id);
 
         // Redirect to the correct URL if the alias doesn't match
         if ($team->alias !== $organization_alias) {

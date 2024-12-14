@@ -18,7 +18,7 @@
         ['key' => 'description', 'label' => 'Description'],
         ['key' => 'created_at', 'label' => 'Created At']
     ]"
-        :dataType="'tasksWithoutProject'"
+        :dataType="'teamTasks'"
         :team="['id' => $team->id, 'alias' => $team->alias]"
     />
 {{--    <button id="reloadTableButton" class="bg-blue-500 text-white px-4 py-2 rounded">Reload Table</button>--}}

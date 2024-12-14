@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Team;
 use Livewire\Component;
 use App\Models\Task;
 use App\Models\Project;
@@ -16,7 +17,7 @@ class CreateTask extends Component
     public $description;
     public $project_id;
     public $task_status_id;
-    public $task_priorities_id;
+    public $priority_id;
     public $user_ids = [];
     public $roles = [];
     public $projects;
@@ -24,12 +25,15 @@ class CreateTask extends Component
     public $priorities;
     public $users;
     public $showModal = false;
+    public $currentTeamId;
 
     public function mount($currentTeamId)
     {
-        $this->projects = Project::all();
+        $team = Team::find($currentTeamId);
+        $this->projects = $team->projects;
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
+        $this->currentTeamId = $currentTeamId;
 
         // Fetch users who belong to the specified team
         $this->users = User::whereHas('teams', function ($query) use ($currentTeamId) {
@@ -39,33 +43,40 @@ class CreateTask extends Component
 
     public function save()
     {
+
         $this->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
-            'task_status_id' => 'required|exists:task_statuses,id',
-            'task_priorities_id' => 'required|exists:task_priorities,id',
+            'priority_id' => 'required|exists:task_priorities,id',
         ]);
 
         $task = Task::create([
             'name' => $this->name,
             'description' => $this->description,
             'project_id' => $this->project_id,
-            'task_status_id' => $this->task_status_id,
-            'task_priorities_id' => $this->task_priorities_id,
+            'task_status_id' => 1,
+            'task_priorities_id' => $this->priority_id,
         ]);
 
+        $syncData = [
+            auth()->id() => ['role_id' => 1], // Author role
+        ];
         // Assign users and roles
-        foreach ($this->user_ids as $key => $user_id) {
-            $task->users()->attach($user_id, ['role_id' => $this->roles[$key]]);
+        if(!empty($this->user_ids)){
+            foreach ($this->user_ids as $key => $user_id) {
+                $syncData[$user_id] = ['role_id' => 2];
+            }
         }
+
+        $task->users()->sync($syncData);
 
         // Reset form and close modal
         $this->reset();
         $this->showModal = false;
 
         session()->flash('success', 'Task created successfully.');
-        $this->emit('taskCreated');
+        $this->dispatch('taskCreated');
     }
 
     public function render()

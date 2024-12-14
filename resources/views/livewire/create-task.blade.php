@@ -28,6 +28,18 @@
                             @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
+                        <!-- Priority -->
+                        <div class="mb-4">
+                            <label for="priority_id" class="block text-sm font-medium text-gray-700">Priority</label>
+                            <select wire:model="priority_id" id="priority_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <option value="">Select priority</option>
+                                @foreach ($priorities as $priority)
+                                    <option value="{{ $priority->id }}">{{ $priority->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('priority_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
                         <!-- Project -->
                         <div class="mb-4">
                             <label for="project_id" class="block text-sm font-medium text-gray-700">Project</label>
@@ -40,7 +52,29 @@
                             @error('project_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        <!-- Add other fields similarly... -->
+                        <!-- Assigned Users -->
+                        @if ($currentTeamId)
+                            <div class="mb-4">
+                                <label for="user_ids" class="block text-sm font-medium text-gray-700">Assign Users</label>
+                                @foreach ($users as $user)
+                                    @if ($user->id !== auth()->id()) <!-- Exclude the logged-in user -->
+                                    <div class="flex items-center mb-2">
+                                        <input  wire:model="user_ids" type="checkbox" name="user_ids[]" value="{{ $user->id }}" id="user_{{ $user->id }}">
+                                        <label for="user_{{ $user->id }}" class="ml-2">{{ $user->name }}</label>
+
+                                        <select name="roles[]" class="ml-4 border-gray-300 rounded-md shadow-sm">
+                                            <option value="">Select Role</option>
+                                            @foreach ($roles as $role)
+                                                @if ($role->id !== 1) <!-- Exclude the author role -->
+                                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
 
                         <!-- Submit Button -->
                         <div class="mt-6 flex justify-end">

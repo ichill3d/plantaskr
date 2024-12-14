@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Team;
 use Livewire\Component;
 
 class TableView extends Component
@@ -35,8 +36,10 @@ class TableView extends Component
                 $this->data = $this->team->users;
                 break;
             }
-            case 'tasks': {
-                $this->data = $this->team->tasks;
+            case 'teamTasks': {
+
+                $team = Team::find($this->team['id']);
+                $this->data = $team->tasks;
                 break;
             }
             default: {

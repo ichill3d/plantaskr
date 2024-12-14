@@ -108,7 +108,7 @@ class ProjectController extends Controller
         ])->with('success', 'Project created successfully.');
     }
 
-    public function show($id, $organizationAlias, $projectId)
+    public function show($id, $organizationAlias, $projectId, $tab = 'overview')
     {
         // Retrieve the team
         $team = Team::where('id', $id)->firstOrFail();
@@ -125,8 +125,12 @@ class ProjectController extends Controller
         // Retrieve the project
         $project = Project::where('id', $projectId)->where('team_id', $team->id)->firstOrFail();
 
+        $allowedTabs = ['overview', 'discussion', 'tasks', 'milestones', 'members', 'settings'];
+        if (!in_array($tab, $allowedTabs)) {
+            abort(404); // Invalid tab, return a 404 response
+        }
 
-        return view('projects.show', compact('project', 'team'));
+        return view('projects.show', compact('project', 'team', 'tab'));
     }
 
 
