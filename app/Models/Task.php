@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Task extends Model
 {
@@ -15,7 +16,9 @@ class Task extends Model
         'task_priorities_id',
         'name',
         'description',
+        'due_date',
     ];
+    protected $appends = ['priority_color', 'is_overdue'];
 
     // Relationships
     public function project()
@@ -74,5 +77,23 @@ class Task extends Model
         }
 
         return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
+    }
+
+    public function milestone()
+    {
+        return $this->belongsTo(Milestone::class, 'milestone_id');
+    }
+    public function getPriorityColorAttribute()
+    {
+        return match ($this->priority) {
+            'high' => 'red-500',
+            'medium' => 'yellow-500',
+            'low' => 'green-500',
+            default => 'gray-500',
+        };
+    }
+    public function getIsOverdueAttribute()
+    {
+        return $this->due_date && Carbon::parse($this->due_date)->isPast();
     }
 }

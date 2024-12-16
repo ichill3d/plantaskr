@@ -36,9 +36,12 @@ class CreateTask extends Component
         $this->currentTeamId = $currentTeamId;
 
         // Fetch users who belong to the specified team
-        $this->users = User::whereHas('teams', function ($query) use ($currentTeamId) {
-            $query->where('team_id', $currentTeamId);
-        })->get();
+        $this->users = $team->users->concat([$team->creator]);
+
+        // Set a default project_id if there's only one project
+        if ($this->projects->count() === 1) {
+            $this->project_id = $this->projects->first()->id;
+        }
     }
 
     public function save()

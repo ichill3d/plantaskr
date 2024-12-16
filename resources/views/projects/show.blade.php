@@ -1,20 +1,33 @@
 @extends('layouts.sections.organization')
 
 @section('content')
-
         <!-- Project Header -->
-        <div class="bg-white shadow-sm rounded-lg mb-6">
+        <div class="bg-white shadow-sm rounded-lg mb-6 p-4">
             <!-- Project Label -->
-            <div class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-3 py-1 rounded-xl uppercase tracking-wide">
+            <div style="background-color: {{ $project->color }}; color: {{ get_contrast_color($project->color) }}"
+                 class="block text-xs font-medium mr-2 px-3 py-1 rounded-xl uppercase tracking-wide">
                 Project
             </div>
+            <div class="flex items-center justify-between py-2">
+                <!-- Left Section: Project Label and Title -->
+                <div>
 
-            <!-- Project Title and Description -->
-            <h1 class="text-2xl font-bold text-gray-800 mt-2">{{ $project->name }}</h1>
-            <p class="text-gray-600 mt-2">{{ $project->description }}</p>
+
+                    <!-- Project Title -->
+                    <h1 class="text-2xl font-bold text-gray-800 mt-2">{{ $project->name }}</h1>
+                </div>
+
+                <!-- Right Section: Livewire Button -->
+                <div>
+                    <livewire:create-task :project="$project" :currentTeamId="$team->id" />
+                </div>
+            </div>
         </div>
+
 
         <!-- Tab Navigation -->
         <livewire:project-tabs :project="$project" :tab="$tab" :team="$team" />
+
+
 
 @endsection

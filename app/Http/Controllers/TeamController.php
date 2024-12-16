@@ -45,7 +45,9 @@ class TeamController extends Controller
             ], 301);
         }
 
-        return view('teams.projects', compact('team'));
+        $projects = $team->projects()->get();
+
+        return view('teams.projects', compact('team', 'projects'));
     }
 
     public function members($id, $organization_alias)

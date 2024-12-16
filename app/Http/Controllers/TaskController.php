@@ -75,6 +75,8 @@ class TaskController extends Controller
             'task_priorities_id' => 'required|exists:task_priorities,id',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'exists:users,id',
+            'milestone_id' => 'nullable|exists:milestones,id',
+            'due_date' => 'nullable|date'
         ]);
 
         // Create the task
@@ -84,6 +86,7 @@ class TaskController extends Controller
             'project_id' => $validated['project_id'],
             'task_status_id' => $validated['task_status_id'],
             'task_priorities_id' => $validated['task_priorities_id'],
+            'due_date' => $validated['due_date'],
         ]);
 
         // Assign the logged-in user as the author

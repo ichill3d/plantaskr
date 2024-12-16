@@ -1,14 +1,9 @@
 @extends('layouts.sections.organization')
 
 @section('content')
-    @include('components.dashboard-header', [
-          'title' => 'Members',
-          'action' => [
-              'url' => route('organizations.members.management', ['id' => $team->id, 'organization_alias' => $team->alias]),
-              'label' => 'Manage Members'
-          ]
-      ])
-    {{--    <x-project-list ajax-url="{{ route('projects.api') }}" />--}}
+    <x-dashboard-header title="Members">
+{{--        <livewire:create-project :teamId="$team->id" />--}}
+    </x-dashboard-header>
     <livewire:table-view
         :model="'App\\Models\\User'"
         :columns="[

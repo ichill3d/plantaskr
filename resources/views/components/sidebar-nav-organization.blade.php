@@ -2,34 +2,46 @@
     <li>
         <x-side-menu-item
             label="Overview"
-            link="{{ route('organizations.overview', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.overview', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.overview')"
+        />
     </li>
-
     <li>
         <x-side-menu-item
             label="Projects"
-            link="{{ route('organizations.projects', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.projects', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.projects*')"
+        />
     </li>
     <li>
         <x-side-menu-item
             label="Tasks"
-            link="{{ route('organizations.tasks', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.tasks', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.tasks')"
+        />
     </li>
     <li>
         <x-side-menu-item
             label="Members"
-            link="{{ route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.members')"
+        />
     </li>
     <li>
         <x-side-menu-item
             label="Members Management"
-            link="{{ route('organizations.members.management', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.members.management', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.members.management')"
+        />
     </li>
     <li>
         <x-side-menu-item
             label="Settings"
-            link="{{ route('organizations.settings', ['id' => $team->id, 'organization_alias' => $team->alias]) }}" />
+            link="{{ route('organizations.settings', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.settings')"
+        />
     </li>
+
 
 
 

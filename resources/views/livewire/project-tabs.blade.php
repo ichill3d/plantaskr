@@ -27,11 +27,11 @@
             class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'milestones' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">
             Milestones
         </button>
-        <button
-            wire:click="setTab('members')"
-            class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'members' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">
-            Members
-        </button>
+{{--        <button--}}
+{{--            wire:click="setTab('members')"--}}
+{{--            class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'members' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">--}}
+{{--            Members--}}
+{{--        </button>--}}
         <button
             wire:click="setTab('settings')"
             class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'settings' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">
@@ -44,7 +44,7 @@
         @if ($tab === 'overview')
             <div>
                 <h2 class="text-lg font-semibold text-gray-800">Overview</h2>
-                <p class="text-gray-600 mt-2">Content for the Overview tab.</p>
+                <p class="text-gray-600 mt-2">{{ $project->description }}</p>
             </div>
         @elseif ($tab === 'discussion')
             <div>
@@ -66,15 +66,15 @@
                 <h2 class="text-lg font-semibold text-gray-800">Milestones</h2>
                 <p class="text-gray-600 mt-2">Content for the Milestones tab.</p>
             </div>
-        @elseif ($tab === 'members')
-            <div>
-                <h2 class="text-lg font-semibold text-gray-800">Members</h2>
-                <p class="text-gray-600 mt-2">Content for the Members tab.</p>
-            </div>
+{{--        @elseif ($tab === 'members')--}}
+{{--            <div>--}}
+{{--                <h2 class="text-lg font-semibold text-gray-800">Members</h2>--}}
+{{--                <p class="text-gray-600 mt-2">Content for the Members tab.</p>--}}
+{{--            </div>--}}
         @elseif ($tab === 'settings')
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Settings</h2>
-                <p class="text-gray-600 mt-2">Content for the Settings tab.</p>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Project Settings</h2>
+                <livewire:edit-project :project="$project" />
             </div>
         @endif
     </div>

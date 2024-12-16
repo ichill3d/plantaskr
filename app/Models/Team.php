@@ -55,11 +55,19 @@ class Team extends JetstreamTeam
     {
         return $this->hasManyThrough(Task::class, Project::class, 'team_id', 'project_id', 'id', 'id');
     }
+    public function labels()
+    {
+        return $this->hasMany(Label::class, 'team_id');
+    }
 
     public function members()
     {
         return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id')
             ->withTimestamps();
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 

@@ -4,7 +4,8 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\TaskController;
-use App\Livewire\ProjectsTable;
+use App\Http\Controllers\MilestoneController;
+use App\Http\Controllers\LabelController;
 
 // Root route
 Route::get('/', function () {
@@ -24,12 +25,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create-project', [ProjectController::class, 'create'])->name('organizations.create-project');
         Route::get('/members-management', [TeamController::class, 'membersManagement'])->name('organizations.members.management');
         Route::get('/settings', [TeamController::class, 'settings'])->name('organizations.settings');
+        Route::get('/task-labels', [TeamController::class, 'taskLabels'])->name('organizations.task-labels');
 
         // Tasks Routes
         Route::prefix('tasks')->group(function () {
             Route::get('/', [TeamController::class, 'tasks'])->name('organizations.tasks');
             Route::get('/view/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
         });
+
 
         // Projects Routes
         Route::prefix('projects')->group(function () {
@@ -38,7 +41,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{project_id}/{tab?}', [ProjectController::class, 'show'])
                 ->where('tab', 'overview|discussion|files|tasks|milestones|members|settings') // Limit valid tabs
                 ->name('organizations.projects.show');
+
+            Route::resource('milestones', MilestoneController::class)->except(['show']);
         });
+
+
+
     });
 
 });

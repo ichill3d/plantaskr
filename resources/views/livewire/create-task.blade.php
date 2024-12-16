@@ -1,7 +1,7 @@
 <div>
 
     <!-- Trigger Button -->
-    <button wire:click="$set('showModal', true)" class="btn btn-primary">Create New Task</button>
+    <button wire:click="$set('showModal', true)" class="bg-gray-200 p-2 rounded-lg hover:bg-gray-300">Create New Task</button>
 
     <!-- Modal -->
     @if($showModal)
@@ -41,15 +41,18 @@
                         </div>
 
                         <!-- Project -->
+                        <select wire:model="project_id" id="project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <option value="" disabled {{ $project_id === null ? 'selected' : '' }}>Select a project</option>
+                            @foreach ($projects as $project)
+                                <option value="{{ $project->id }}" {{ $project->id == $project_id ? 'selected' : '' }}>
+                                    {{ $project->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
                         <div class="mb-4">
-                            <label for="project_id" class="block text-sm font-medium text-gray-700">Project</label>
-                            <select wire:model="project_id" id="project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                <option value="" disabled>Select a project</option>
-                                @foreach ($projects as $project)
-                                    <option value="{{ $project->id }}">{{ $project->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('project_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                            <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                            <input type="date" name="due_date" id="due_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                         </div>
 
                         <!-- Assigned Users -->
@@ -57,7 +60,7 @@
                             <div class="mb-4">
                                 <label for="user_ids" class="block text-sm font-medium text-gray-700">Assign Users</label>
                                 @foreach ($users as $user)
-                                    @if ($user->id !== auth()->id()) <!-- Exclude the logged-in user -->
+
                                     <div class="flex items-center mb-2">
                                         <input  wire:model="user_ids" type="checkbox" name="user_ids[]" value="{{ $user->id }}" id="user_{{ $user->id }}">
                                         <label for="user_{{ $user->id }}" class="ml-2">{{ $user->name }}</label>
@@ -71,7 +74,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    @endif
+
                                 @endforeach
                             </div>
                         @endif
