@@ -1,11 +1,9 @@
 <div>
-
     <!-- Trigger Button -->
     <button wire:click="$set('showModal', true)" class="bg-gray-200 p-2 rounded-lg hover:bg-gray-300">Create New Task</button>
 
     <!-- Modal -->
     @if($showModal)
-        <!-- Backdrop -->
         <div class="fixed inset-0 bg-black bg-opacity-50 z-40" wire:click="$set('showModal', false)"></div>
 
         <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -41,31 +39,59 @@
                         </div>
 
                         <!-- Project -->
-                        <select wire:model="project_id" id="project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                            <option value="" disabled {{ $project_id === null ? 'selected' : '' }}>Select a project</option>
-                            @foreach ($projects as $project)
-                                <option value="{{ $project->id }}" {{ $project->id == $project_id ? 'selected' : '' }}>
-                                    {{ $project->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="mb-4">
+                            <label for="project_id" class="block text-sm font-medium text-gray-700">Project</label>
+                            <select wire:model="project_id" id="project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <option value="" >Select a project</option>
+                                @foreach ($projects as $project)
+                                    <option value="{{ $project->id }}">{{ $project->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('project_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
 
+                        <!-- Due Date -->
                         <div class="mb-4">
                             <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
-                            <input type="date" name="due_date" id="due_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <div>
+                                <input
+                                    type="text"
+                                    id="due_date"
+                                    wire:model.live="due_date"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm flatpickr"
+                                    placeholder="Select a date"
+                                />
+                            </div>
+
+
+                            @error('due_date') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
+                        <!-- Push Flatpickr Initialization Script -->
+                        @script
+                            <script>
+
+                                Livewire.on('showTheModal', () => {
+
+                                    setTimeout(() => {
+                                        flatpickr(".flatpickr", {
+                                            dateFormat: "Y-m-d", // Adjust as per your database format
+                                            allowInput: false,  // Prevent manual typing
+                                        });
+                                    }, 100); // Short delay (100ms) to ensure DOM is updated
+                                });
+                            </script>
+                        @endscript
 
                         <!-- Assigned Users -->
                         @if ($currentTeamId)
                             <div class="mb-4">
                                 <label for="user_ids" class="block text-sm font-medium text-gray-700">Assign Users</label>
                                 @foreach ($users as $user)
-
                                     <div class="flex items-center mb-2">
-                                        <input  wire:model="user_ids" type="checkbox" name="user_ids[]" value="{{ $user->id }}" id="user_{{ $user->id }}">
+                                        <input wire:model="user_ids" type="checkbox" value="{{ $user->id }}" id="user_{{ $user->id }}">
                                         <label for="user_{{ $user->id }}" class="ml-2">{{ $user->name }}</label>
 
-                                        <select name="roles[]" class="ml-4 border-gray-300 rounded-md shadow-sm">
+                                        <select wire:model.defer="roles.{{ $user->id }}" class="ml-4 border-gray-300 rounded-md shadow-sm">
                                             <option value="">Select Role</option>
                                             @foreach ($roles as $role)
                                                 @if ($role->id !== 1) <!-- Exclude the author role -->
@@ -74,7 +100,6 @@
                                             @endforeach
                                         </select>
                                     </div>
-
                                 @endforeach
                             </div>
                         @endif

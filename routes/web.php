@@ -30,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
         // Tasks Routes
         Route::prefix('tasks')->group(function () {
             Route::get('/', [TeamController::class, 'tasks'])->name('organizations.tasks');
-            Route::get('/view/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
+            Route::get('/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
         });
 
 

@@ -89,7 +89,6 @@ class TaskList extends Component
     }
     public function render()
     {
-        logger('Component renered');
         $tasks = Task::query()
             ->when($this->teamId, function ($query) {
                 $query->whereHas('project.team', fn ($teamQuery) => $teamQuery->where('id', $this->teamId));

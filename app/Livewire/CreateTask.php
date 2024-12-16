@@ -17,6 +17,7 @@ class CreateTask extends Component
     public $description;
     public $project_id;
     public $task_status_id;
+    public $due_date;
     public $priority_id;
     public $user_ids = [];
     public $roles = [];
@@ -27,25 +28,39 @@ class CreateTask extends Component
     public $showModal = false;
     public $currentTeamId;
 
-    public function mount($currentTeamId)
+    protected $listeners = ['taskCreated' => '$refresh'];
+
+    public function mount($currentTeamId, $project_id = null)
     {
-        $team = Team::find($currentTeamId);
+        $team = Team::findOrFail($currentTeamId);
+
         $this->projects = $team->projects;
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
         $this->currentTeamId = $currentTeamId;
 
-        // Fetch users who belong to the specified team
-        $this->users = $team->users->concat([$team->creator]);
+        // Fetch users and ensure uniqueness
+        $this->users = $team->users->concat([$team->creator])->unique('id');
 
-        // Set a default project_id if there's only one project
+        // Set default project and status
         if ($this->projects->count() === 1) {
             $this->project_id = $this->projects->first()->id;
+        }
+        $this->task_status_id = $this->statuses->first()->id ?? null;
+
+        $this->project_id = $project_id ?? ($this->projects->count() === 1 ? $this->projects->first()->id : null);
+
+    }
+    public function updatedShowModal($value)
+    {
+        if ($value) {
+            $this->dispatch('showTheModal'); // Dispatch a custom event when modal is shown
         }
     }
 
     public function save()
     {
+        $this->project_id = empty($this->project_id) ?? $this->projects->first()->id;
 
         $this->validate([
             'name' => 'required|string|max:255',
@@ -58,29 +73,18 @@ class CreateTask extends Component
             'name' => $this->name,
             'description' => $this->description,
             'project_id' => $this->project_id,
-            'task_status_id' => 1,
+            'task_status_id' => $this->task_status_id,
             'task_priorities_id' => $this->priority_id,
         ]);
 
-        $syncData = [
-            auth()->id() => ['role_id' => 1], // Author role
-        ];
-        // Assign users and roles
-        if(!empty($this->user_ids)){
-            foreach ($this->user_ids as $key => $user_id) {
-                $syncData[$user_id] = ['role_id' => 2];
-            }
-        }
-
-        $task->users()->sync($syncData);
-
-        // Reset form and close modal
-        $this->reset();
+        // Reset and close modal
+        $this->reset(['name', 'description', 'project_id', 'priority_id', 'user_ids']);
         $this->showModal = false;
 
         session()->flash('success', 'Task created successfully.');
         $this->dispatch('taskCreated');
     }
+
 
     public function render()
     {

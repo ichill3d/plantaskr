@@ -69,5 +69,6 @@
 
 <!-- Include pushed scripts -->
 @stack('scripts')
+
 </body>
 </html>

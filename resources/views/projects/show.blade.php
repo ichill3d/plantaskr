@@ -19,7 +19,7 @@
 
                 <!-- Right Section: Livewire Button -->
                 <div>
-                    <livewire:create-task :project="$project" :currentTeamId="$team->id" />
+                    <livewire:create-task :currentTeamId="$team->id" :project_id="$project->id ?? null" />
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 
 @section('content')
     <x-dashboard-header title="Tasks">
-        <livewire:create-task :currentTeamId="$team->id" />
+        <livewire:create-task :currentTeamId="$team->id" :project_id="$project->id ?? null" />
     </x-dashboard-header>
     <livewire:task-list :team-id="$team->id" />
 @endsection

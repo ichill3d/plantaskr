@@ -164,7 +164,8 @@
             <!-- Task Name and Description -->
             <div class="w-1/4">
                 <h3 class="text-sm font-medium text-gray-800 truncate">
-                    <a href="{{ route('tasks.show', $task->id) }}" class="hover:underline text-blue-600">
+
+                    <a href="{{ route('organizations.tasks.show', ['id'=>$task->team->id, 'organization_alias'=>$task->team->alias, 'task_id'=>$task->id]) }}" class="hover:underline text-blue-600">
                         {{ $task->name }}
                     </a>
                 </h3>

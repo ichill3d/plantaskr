@@ -32,12 +32,11 @@ class TaskController extends Controller
 
         return view('tasks.index', compact('tasks'));
     }
-    public function show($task_id)
+    public function show($orgId, $orgAlias, $taskId)
     {
-        $task = Task::where('id', $task_id)->firstOrFail();
-        $task->load(['project', 'status', 'priority', 'users', 'labels', 'links.type', 'attachments']);
-
-        return view('tasks.show', compact('task'));
+        $task = Task::with(['project', 'status', 'priority', 'users'])->findOrFail($taskId);
+        $team = $task->team;
+        return view('tasks.show', compact('task', 'team'));
     }
     public function create()
     {

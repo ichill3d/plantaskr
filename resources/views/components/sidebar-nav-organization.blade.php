@@ -17,7 +17,7 @@
         <x-side-menu-item
             label="Tasks"
             link="{{ route('organizations.tasks', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
-            :active="request()->routeIs('organizations.tasks')"
+            :active="request()->routeIs('organizations.tasks*')"
         />
     </li>
     <li>

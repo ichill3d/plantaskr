@@ -84,12 +84,12 @@ class User extends Authenticatable
     public function tasks()
     {
         return $this->belongsToMany(
-            Task::class,          // Related model
-            'task_users',         // Pivot table name
-            'users_id',           // Foreign key on the pivot table for the User
-            'tasks_id'            // Foreign key on the pivot table for the Task
-        )->withPivot('role_id') // Include role_id from the pivot table
-        ->withTimestamps();    // Include created_at and updated_at timestamps
+            Task::class,
+            'task_users', // Pivot table name
+            'users_id',   // Foreign key on the pivot table for users
+            'tasks_id'    // Foreign key on the pivot table for tasks
+        )->withPivot('role_id') // Include additional pivot data
+        ->withTimestamps();   // Include timestamps
     }
 
 }

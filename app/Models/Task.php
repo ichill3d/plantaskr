@@ -19,7 +19,9 @@ class Task extends Model
         'due_date',
     ];
     protected $appends = ['priority_color', 'is_overdue'];
-
+    protected $casts = [
+        'due_date' => 'date',
+    ];
     // Relationships
     public function project()
     {
@@ -41,6 +43,10 @@ class Task extends Model
         return $this->belongsToMany(User::class, 'task_users', 'tasks_id', 'users_id')
             ->withPivot('role_id') // Include the role_id in the pivot
             ->withTimestamps();
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function labels()
@@ -105,4 +111,9 @@ class Task extends Model
             'users_id'
         )->withPivot('role_id')->withTimestamps();
     }
+    public function team()
+    {
+        return $this->hasOneThrough(Team::class, Project::class, 'id', 'id', 'project_id', 'team_id');
+    }
+
 }
