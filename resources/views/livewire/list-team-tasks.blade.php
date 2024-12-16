@@ -1,7 +1,7 @@
 <div class="bg-white shadow-md rounded-lg">
     <!-- Table Header -->
     <div class="hidden md:flex items-center justify-between px-4 py-2 font-semibold text-gray-600 text-sm uppercase tracking-wide">
-        <div class="w-1/3 truncate cursor-pointer" wire:click="sortBy('name')">
+        <div class="w-1/4 truncate cursor-pointer" wire:click="sortBy('name')">
             Task
             @if ($sortColumn === 'name')
                 <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span>
@@ -25,6 +25,7 @@
                 <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span>
             @endif
         </div>
+        <div class="w-1/4 truncate">Assignees</div>
     </div>
 
     <!-- Task Rows -->
@@ -32,7 +33,7 @@
         <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 border-t border-gray-200 rounded-md mb-1"
              style="border-left: 7px solid {{ $task->project->color ?? '#ddd' }};">
             <!-- Task Name and Description -->
-            <div class="w-1/3">
+            <div class="w-1/4">
                 <h3 class="text-sm font-medium text-gray-800 truncate">
                     <a href="{{ route('tasks.show', $task->id) }}" class="hover:underline text-blue-600">
                         {{ $task->name }}
@@ -58,6 +59,21 @@
             <!-- Project -->
             <div class="w-1/6 text-sm text-gray-600 truncate">
                 {{ $task->project->name ?? 'No Project' }}
+            </div>
+
+            <!-- Assignees -->
+            <div class="w-1/4 flex space-x-2">
+                @foreach ($task->assignees as $assignee)
+                    <div class="relative w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                        @if ($assignee->profile_photo_url)
+                            <img src="{{ $assignee->profile_photo_url }}" alt="{{ $assignee->name }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="text-sm font-semibold text-gray-700">
+                                {{ strtoupper(substr($assignee->name, 0, 1)) }}
+                            </span>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </div>
     @endforeach

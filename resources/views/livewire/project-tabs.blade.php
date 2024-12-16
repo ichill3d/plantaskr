@@ -58,13 +58,11 @@
             </div>
         @elseif ($tab === 'tasks')
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Tasks</h2>
-                <p class="text-gray-600 mt-2">Content for the Tasks tab.</p>
+                <livewire:task-list :project-id="$project->id" />
             </div>
         @elseif ($tab === 'milestones')
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Milestones</h2>
-                <p class="text-gray-600 mt-2">Content for the Milestones tab.</p>
+                <livewire:milestones :project-id="$project->id" />
             </div>
 {{--        @elseif ($tab === 'members')--}}
 {{--            <div>--}}

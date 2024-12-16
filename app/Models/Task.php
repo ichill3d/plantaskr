@@ -96,4 +96,13 @@ class Task extends Model
     {
         return $this->due_date && Carbon::parse($this->due_date)->isPast();
     }
+    public function assignees()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'task_users',
+            'tasks_id',
+            'users_id'
+        )->withPivot('role_id')->withTimestamps();
+    }
 }
