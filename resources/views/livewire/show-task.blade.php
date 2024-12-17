@@ -14,9 +14,7 @@
         <!-- Files Section -->
         <div class="mb-6">
             <h2 class="text-lg font-semibold text-gray-700 mb-2">Files</h2>
-            <div class="border rounded-md p-4 bg-gray-50">
-                <p class="text-gray-500">No files uploaded yet.</p>
-            </div>
+            <livewire:file-upload :taskId="$task->id" />
         </div>
 
         <!-- Discussion Section -->

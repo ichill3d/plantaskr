@@ -53,8 +53,7 @@
             </div>
         @elseif ($tab === 'files')
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Files</h2>
-                <p class="text-gray-600 mt-2">Content for the Files tab.</p>
+                <livewire:file-upload :projectId="$project->id" />
             </div>
         @elseif ($tab === 'tasks')
             <div>
