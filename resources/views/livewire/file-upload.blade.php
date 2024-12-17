@@ -23,10 +23,11 @@
 
     <!-- File List -->
     <div class="mt-4" x-data="{ showLightbox: false, lightboxImage: '', lightboxTitle: '' }">
-        @if($attachments->isNotEmpty())
+
 
             <!-- Grid Container -->
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
                 @foreach ($attachments as $attachment)
                     <div class="relative group">
                         <!-- Thumbnail -->
@@ -101,8 +102,6 @@
                     <p class="text-center text-white mt-2 text-sm truncate" x-text="lightboxTitle"></p>
                 </div>
             </div>
-        @else
-            <p class="text-gray-500">No files uploaded yet.</p>
-        @endif
+
     </div>
 </div>
