@@ -27,32 +27,12 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="bg-gray-100 shadow rounded-lg p-6 space-y-4">
-        <!-- Metadata -->
-        <div>
-            <h3 class="text-lg font-semibold text-gray-700">Metadata</h3>
-            <ul class="space-y-2 text-sm text-gray-600">
-                <li><div class="font-semibold">Date Created:</div> <span>{{ $task->created_at }}</span></li>
-                <li><div class="font-semibold">Project:</div> <span>{{ $task->project->name }}</span></li>
-                <li><div class="font-semibold">Milestone:</div> <span>{{ $task->milestone?->name ?? "add to milestone" }}</span></li>
-                <li><div class="font-semibold">Assignees:</div>
-                    <span>
-                       @foreach ($task->assignees as $assignee)
-                            <div class="relative w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                                @if ($assignee->profile_photo_path)
-                                    <img src="{{ $assignee->profile_photo_path }}" alt="{{ $assignee->name }}" class="w-full h-full object-cover">
-                                @else
-                                    <span class="text-sm font-semibold text-gray-700">
-                                    {{ strtoupper(substr($assignee->name, 0, 1)) }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endforeach
-                    </span>
-                </li>
-                <li><div class="font-semibold">Priority:</div> <span>{{ $task->priority->name }}</span></li>
-                <li><div class="font-semibold">Status:</div> <span>{{ $task->status->name }}</span></li>
-            </ul>
-        </div>
-    </div>
+    @include('components.task.sidebar', [
+    'task' => $task,
+    'statuses' => $statuses,
+    'priorities' => $priorities,
+    'milestones' => $milestones,
+    'teamMembers' => $teamMembers,
+    'roles' => $roles
+])
 </div>
