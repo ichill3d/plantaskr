@@ -53,19 +53,27 @@ class CreateTask extends Component
     }
     public function updatedShowModal($value)
     {
+
         if ($value) {
+
+            if (is_null($this->project_id) && $this->projects->count() === 1) {
+                $this->project_id = $this->projects->first()->id;
+            }
+
             $this->dispatch('showTheModal'); // Dispatch a custom event when modal is shown
         }
     }
 
     public function save()
     {
-        $this->project_id = empty($this->project_id) ?? $this->projects->first()->id;
-
         $this->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'project_id' => 'required|exists:projects,id',
+            'project_id' => ['required', function ($attribute, $value, $fail) {
+                if (!$this->projects->pluck('id')->contains($value)) {
+                    $fail('The selected project is invalid.');
+                }
+            }],
             'priority_id' => 'required|exists:task_priorities,id',
         ]);
 
