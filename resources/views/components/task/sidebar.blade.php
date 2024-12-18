@@ -142,6 +142,24 @@
                     </div>
                 </div>
             </li>
+
         </ul>
+        <div class="bg-gray-100 shadow rounded-lg p-6 space-y-4">
+            <!-- Other Sidebar Content -->
+
+            <button
+                @click="if (document.querySelector('[x-data]')) {
+                $dispatch('usermessage-show', {
+                    type: 'confirm',
+                    title: 'Confirm Task Deletion',
+                    message: 'Are you sure you want to delete this task?',
+                    action: () => { @this.call('deleteTask') }
+                });
+            }"
+                class="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition"
+            >
+                Delete Task
+            </button>
+        </div>
     </div>
 </div>

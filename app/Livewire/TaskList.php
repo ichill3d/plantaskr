@@ -87,6 +87,11 @@ class TaskList extends Component
         }
 
     }
+
+    public function deleteTask($taskId)
+    {
+        Task::findOrFail($taskId)->delete();
+    }
     public function render()
     {
         $tasks = Task::query()

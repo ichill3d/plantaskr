@@ -98,6 +98,12 @@ class CreateTask extends Component
 
         session()->flash('success', 'Task created successfully.');
         $this->dispatch('taskCreated');
+
+        return redirect()->route('organizations.projects.show',
+            ['id' => $task->team->id,
+                'organization_alias' => $task->team->alias,
+                'project_id' => $task->project->id,
+                'tab' => 'tasks']);
     }
 
 

@@ -213,6 +213,26 @@
             <div class="w-1/6 text-sm text-gray-600 truncate">
                 {{ $task->status->name }}
             </div>
+
+            <div class="w-1/12 flex justify-end">
+                <button
+                    @click="if (document.querySelector('[x-data]')) {
+            $dispatch('usermessage-show', {
+                type: 'confirm',
+                title: 'Confirm Task Deletion',
+                message: 'Are you sure you want to delete this task?',
+                action: () => { @this.call('deleteTask', {{ $task->id }}) }
+            });
+        }"
+                    class="bg-red-300 text-white p-2 rounded-full hover:bg-red-600 transition"
+                    aria-label="Delete Task"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
         </div>
     @endforeach
 

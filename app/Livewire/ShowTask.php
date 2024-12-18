@@ -44,6 +44,19 @@ class ShowTask extends Component
 
     }
 
+    public function deleteTask()
+    {
+        $this->task->delete();
+
+        session()->flash('success', 'Task deleted successfully.');
+
+        return redirect()->route('organizations.projects.show',
+            ['id' => $this->task->team->id,
+                'organization_alias' => $this->task->team->alias,
+                'project_id' => $this->task->project->id,
+                'tab' => 'tasks']);
+    }
+
     public function toggleAssignee($userId)
     {
         // Toggle user assignment
