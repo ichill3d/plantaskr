@@ -3,13 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Team;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Task;
-use App\Models\Project;
 use App\Models\TaskStatus;
 use App\Models\TaskPriority;
-use App\Models\Role;
-use App\Models\User;
 
 class CreateTask extends Component
 {
@@ -75,6 +73,7 @@ class CreateTask extends Component
                 }
             }],
             'priority_id' => 'required|exists:task_priorities,id',
+            'user_ids' => 'array|exists:users,id',
         ]);
 
         $task = Task::create([
@@ -83,15 +82,23 @@ class CreateTask extends Component
             'project_id' => $this->project_id,
             'task_status_id' => $this->task_status_id,
             'task_priorities_id' => $this->priority_id,
+            'created_by_user_id' => Auth::id(), // Ensure logged-in user is always set
         ]);
 
-        // Reset and close modal
+        if (!empty($this->user_ids)) {
+            foreach ($this->user_ids as $userId) {
+                $task->assignees()->attach($userId, ['role_id' => 2]);
+            }
+        }
+
         $this->reset(['name', 'description', 'project_id', 'priority_id', 'user_ids']);
         $this->showModal = false;
 
         session()->flash('success', 'Task created successfully.');
         $this->dispatch('taskCreated');
     }
+
+
 
 
     public function render()

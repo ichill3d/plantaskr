@@ -82,32 +82,91 @@
                             </script>
                         @endscript
 
-                        <!-- Assigned Users -->
+                        <!-- Assign Users -->
                         @if ($currentTeamId)
-                            <div class="mb-4">
-                                <label for="user_ids" class="block text-sm font-medium text-gray-700">Assign Users</label>
-                                @foreach ($users as $user)
-                                    <div class="flex items-center mb-2">
-                                        <input wire:model="user_ids" type="checkbox" value="{{ $user->id }}" id="user_{{ $user->id }}">
-                                        <label for="user_{{ $user->id }}" class="ml-2">{{ $user->name }}</label>
-
-                                        <select wire:model.defer="roles.{{ $user->id }}" class="ml-4 border-gray-300 rounded-md shadow-sm">
-                                            <option value="">Select Role</option>
-                                            @foreach ($roles as $role)
-                                                @if ($role->id !== 1) <!-- Exclude the author role -->
-                                                <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
+                            <div x-data="{
+            assignOpen: false,
+            search: '',
+            selectedUsers: @entangle('user_ids'),
+            allUsers: {{ $users->map(fn($user) => ['id' => $user->id, 'name' => $user->name, 'profile_photo_path' => $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : null]) }}
+        }"
+                                 class="mb-4 relative">
+                                <div class="flex justify-between items-center">
+                                    <div for="assign_users" class="text-sm font-medium text-gray-700 flex items-start space-x-2 h-10">
+                                        Assigned to:
+                                        <div id="assigned_users" class="flex items-start space-x-2">
+                                            <!-- Display Selected Users -->
+                                            <template x-for="userId in selectedUsers" :key="userId">
+                                                <div class="relative w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                                                    <template x-if="allUsers.find(user => user.id === userId)?.profile_photo_path">
+                                                        <img :src="allUsers.find(user => user.id === userId).profile_photo_path"
+                                                             :alt="allUsers.find(user => user.id === userId).name"
+                                                             class="w-full h-full object-cover">
+                                                    </template>
+                                                    <template x-if="!allUsers.find(user => user.id === userId)?.profile_photo_path">
+                                <span class="text-sm font-semibold text-gray-700"
+                                      x-text="allUsers.find(user => user.id === userId).name[0].toUpperCase()"></span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                @endforeach
+
+                                    <a href="#" @click="assignOpen = !assignOpen" class="text-blue-500 hover:underline">
+                                        Select Members
+                                    </a>
+                                </div>
+
+                                <!-- Dropdown -->
+                                <div x-show="assignOpen"
+                                     class="w-full rounded-md py-2 px-4 border border-gray-300">
+                                    <div>
+                                        <h3 class="font-semibold mb-2">Select Members</h3>
+                                        <!-- Search Input -->
+                                        <input x-model="search" type="text" placeholder="Search users..."
+                                               class="mb-2 w-full border rounded-md px-2 py-1 text-sm" />
+
+                                        <!-- User List with Checkboxes -->
+                                        <ul class="max-h-24 overflow-y-auto">
+                                            @foreach ($users as $user)
+                                                <li x-show="!search || '{{ strtolower($user->name) }}'.includes(search.toLowerCase())"
+                                                    class="flex items-center space-x-2 mb-2">
+                                                    <!-- Checkbox and Name -->
+                                                    <label class="flex items-center space-x-2">
+                                                        <input type="checkbox"
+                                                               @change="if ($event.target.checked) {
+                                            selectedUsers.push({{ $user->id }});
+                                        } else {
+                                            selectedUsers = selectedUsers.filter(userId => userId !== {{ $user->id }});
+                                        }"
+                                                               :checked="selectedUsers.includes({{ $user->id }})" />
+                                                        <!-- Avatar -->
+                                                        <div class="relative w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                                                            @if ($user->profile_photo_path)
+                                                                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                <span class="text-sm font-semibold text-gray-700">
+                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        </span>
+                                                            @endif
+                                                        </div>
+                                                        <span>{{ $user->name }}</span>
+                                                    </label>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         @endif
 
+
+
                         <!-- Submit Button -->
-                        <div class="mt-6 flex justify-end">
+                        <div class="mt-6 flex justify-between">
+
                             <button type="button" wire:click="$set('showModal', false)" class="btn btn-secondary mr-2">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="submit" class="btn btn-primary">Create Task</button>
                         </div>
                     </form>
                 </div>
