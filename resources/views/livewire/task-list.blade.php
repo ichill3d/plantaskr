@@ -154,7 +154,10 @@
             @endif
         </div>
         <div class="w-1/4 truncate">Assignees</div>
-        <div class="w-1/6 truncate">Status</div>
+        <div class="w-1/6 truncate cursor-pointer" wire:click="sortBy('task_status_id')">Status
+            @if ($sortColumn === 'task_status_id')
+                <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            @endif</div>
     </div>
 
     <!-- Task Rows -->

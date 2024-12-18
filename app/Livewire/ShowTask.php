@@ -9,6 +9,8 @@ use App\Models\TaskStatus;
 use App\Models\TaskPriority;
 use App\Models\Milestone;
 use App\Models\User;
+use Mews\Purifier\Facades\Purifier;
+
 
 
 
@@ -25,6 +27,8 @@ class ShowTask extends Component
     public function mount($task)
     {
         $this->task = Task::with(['project:id,name,color', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
+        $this->task->description = Purifier::clean($this->task->description);
+
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
         $this->milestones = $task->project->milestones ?? [];

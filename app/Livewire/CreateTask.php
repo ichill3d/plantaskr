@@ -51,12 +51,14 @@ class CreateTask extends Component
     }
     public function updatedShowModal($value)
     {
-
         if ($value) {
 
             if (is_null($this->project_id) && $this->projects->count() === 1) {
                 $this->project_id = $this->projects->first()->id;
             }
+
+            $this->dispatch('modal-open');
+
 
             $this->dispatch('showTheModal'); // Dispatch a custom event when modal is shown
         }
@@ -66,7 +68,7 @@ class CreateTask extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string', // Allow HTML content
             'project_id' => ['required', function ($attribute, $value, $fail) {
                 if (!$this->projects->pluck('id')->contains($value)) {
                     $fail('The selected project is invalid.');

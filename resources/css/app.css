@@ -9,3 +9,7 @@
     display: none;
 }
 
+.quill-editor {
+    height: 200px; /* Adjust as needed */
+    width: 100%;
+}

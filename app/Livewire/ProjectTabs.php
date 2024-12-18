@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Mews\Purifier\Facades\Purifier;
 
 class ProjectTabs extends Component
 {
@@ -15,6 +16,7 @@ class ProjectTabs extends Component
         $this->project = $project;
         $this->tab = $tab;
         $this->team = $team;
+        $this->project->description = Purifier::clean($this->project->description);
     }
 
     public function setTab($tab)

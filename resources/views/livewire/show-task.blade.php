@@ -15,9 +15,9 @@
         <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ $task->name }}</h1>
 
         <!-- Task Description -->
-        <div class="text-gray-600 mb-6">
+        <div class="text-gray-600 mb-6 border rounded-md p-4">
             <p>
-                {{ $task->description }}
+                {!! $task->description !!}
             </p>
         </div>
 

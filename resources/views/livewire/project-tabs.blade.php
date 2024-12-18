@@ -43,8 +43,7 @@
     <div class="p-6 bg-white shadow rounded-lg mt-4">
         @if ($tab === 'overview')
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Overview</h2>
-                <p class="text-gray-600 mt-2">{{ $project->description }}</p>
+                <p class="text-gray-600 mt-2">{!!  $project->description !!}</p>
             </div>
         @elseif ($tab === 'discussion')
             <div>

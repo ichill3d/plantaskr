@@ -100,7 +100,7 @@ class TaskList extends Component
             ->when(!empty($this->selectedAssignees), fn($query) =>
             $query->whereHas('assignees', fn($q) => $q->whereIn('users.id', $this->selectedAssignees))
             )
-            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('status_id', $this->selectedStatuses))
+            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('task_status_id', $this->selectedStatuses))
             ->when(!empty($this->selectedMilestones), fn($query) => $query->whereIn('milestone_id', $this->selectedMilestones))
             ->when($this->sortColumn === 'task_priorities_id', function ($query) {
                 $query->join('task_priorities', 'tasks.task_priorities_id', '=', 'task_priorities.id')
