@@ -17,7 +17,7 @@ class CreateProject extends Component
 
     protected $rules = [
         'name' => 'required|string|max:255',
-        'description' => 'nullable|string|max:500',
+        'description' => 'nullable|string|max:60000',
         'color' => 'required|string|max:7', // Ensure this is a valid hex color
     ];
 
@@ -38,6 +38,11 @@ class CreateProject extends Component
         $this->dispatch('projectCreated');
 
         session()->flash('success', 'Project created successfully!');
+    }
+
+    public function updatedDescription($value)
+    {
+        $this->dispatch('refreshQuillContent', ['name' => 'description', 'content' => $value]);
     }
 
     public function render()

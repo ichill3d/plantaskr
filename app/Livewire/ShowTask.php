@@ -9,6 +9,8 @@ use App\Models\TaskStatus;
 use App\Models\TaskPriority;
 use App\Models\Milestone;
 use App\Models\User;
+use Mews\Purifier\Facades\Purifier;
+
 
 
 
@@ -20,11 +22,17 @@ class ShowTask extends Component
     public $milestones;
     public $teamMembers;
     public $roles;
+    public $description;
+    public $isEditingDescription = false;
+
 
 
     public function mount($task)
     {
         $this->task = Task::with(['project:id,name,color', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
+
+        $this->task->description = Purifier::clean($this->task->description);
+        $this->description = $this->task->description;
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
         $this->milestones = $task->project->milestones ?? [];
@@ -79,6 +87,30 @@ class ShowTask extends Component
             $this->task->save();
             session()->flash('success', 'Task priority updated successfully.');
         }
+    }
+
+    public function toggleEditDescription()
+    {
+        $this->isEditingDescription = !$this->isEditingDescription;
+
+        if ($this->isEditingDescription) {
+            // Dispatch event to reinitialize the editor with current content
+            $this->dispatch('refreshQuillContent', [
+                'name' => 'description',
+                'content' => $this->description,
+            ]);
+        }
+    }
+    public function saveDescription()
+    {
+        $this->validate([
+            'description' => 'required|string|min:3',
+        ]);
+
+        $this->task->update(['description' => $this->description]);
+        $this->isEditingDescription = false;
+
+        session()->flash('success', 'Description updated successfully.');
     }
 
     public function render()

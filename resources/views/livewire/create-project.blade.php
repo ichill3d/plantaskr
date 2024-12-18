@@ -23,7 +23,7 @@
                         <!-- Description -->
                         <div class="mb-4">
                             <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea wire:model="description" id="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                            <x-quill-editor :key="$showModal" name="description" />
                             @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
