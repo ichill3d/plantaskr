@@ -1,4 +1,5 @@
 import './bootstrap';
+
 import '/node_modules/datatables.net-dt/css/dataTables.dataTables.min.css';
 import flatpickr from "flatpickr";
 import Quill from 'quill'; // Core import for Quill 2
@@ -16,3 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         allowInput: false, // Disables manual typing
     });
 });
+
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import sort from '@alpinejs/sort'
+
+Alpine.plugin(sort)
+Livewire.start()

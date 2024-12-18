@@ -15,6 +15,8 @@ class Milestones extends Component
         'description' => '',
         'tasks' => [],
     ];
+    protected $listeners = ['reorderMilestones' => 'updateMilestoneOrder'];
+
     public $availableTasks = [];
     public $showModal = false;
 
@@ -35,9 +37,34 @@ class Milestones extends Component
     public function loadMilestones()
     {
         $this->milestones = Milestone::where('projects_id', $this->projectId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('position', 'asc')
             ->get()
             ->toArray();
+    }
+    public function updateMilestoneOrder(array $orderedIds)
+    {
+        foreach ($orderedIds as $index => $id) {
+            Milestone::where('id', $id)->update(['position' => $index]);
+        }
+
+        $this->loadMilestones(); // Reload milestones to reflect updated order
+    }
+    public function saveMilestone($id, $name, $description)
+    {
+        $milestone = Milestone::findOrFail($id);
+        $milestone->update([
+            'name' => $name,
+            'description' => $description,
+        ]);
+
+        $this->loadMilestones(); // Reload milestones to reflect changes
+    }
+
+    public function deleteMilestone($id)
+    {
+        Milestone::findOrFail($id)->delete();
+
+        $this->loadMilestones(); // Reload milestones to reflect changes
     }
 
     public function loadAvailableTasks()

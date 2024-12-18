@@ -9,15 +9,95 @@
         </button>
     </div>
 
-    <!-- List Milestones -->
-    <ul class="space-y-4">
-        @foreach($milestones as $milestone)
-            <li class="p-4 bg-gray-100 rounded shadow">
-                <h3 class="text-lg font-semibold">{{ $milestone['name'] }}</h3>
-                <p class="text-gray-600">{{ $milestone['description'] }}</p>
+
+    <ul
+        class="space-y-4"
+        x-data
+        x-sort="$wire.updateMilestoneOrder($event.detail.new)"
+        x-ref="milestones"
+    >
+        @foreach ($milestones as $milestone)
+            <li
+                class="p-4 bg-gray-100 rounded shadow flex justify-between items-center cursor-move relative group"
+                x-sort:item="{{ $milestone['id'] }}"
+                x-data="{ editing: false, name: '{{ $milestone['name'] }}', description: '{{ $milestone['description'] }}' }"
+            >
+                <!-- Editable Content -->
+                <div class="flex-1">
+                    <div x-show="!editing" class="space-y-1">
+                        <h3 class="text-lg font-semibold">{{ $milestone['name'] }}</h3>
+                        <p class="text-gray-600">{{ $milestone['description'] }}</p>
+                    </div>
+                    <div x-show="editing" class="space-y-2">
+                        <input
+                            type="text"
+                            x-model="name"
+                            class="block w-full border-gray-300 rounded px-2 py-1 text-sm"
+                        />
+                        <textarea
+                            x-model="description"
+                            class="block w-full border-gray-300 rounded px-2 py-1 text-sm"
+                        ></textarea>
+                        <div class="flex space-x-2">
+                            <button
+                                @click="$wire.saveMilestone({{ $milestone['id'] }}, name, description); editing = false"
+                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                            >
+                                Save
+                            </button>
+                            <button
+                                @click="editing = false"
+                                class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center space-x-2">
+                    <button
+                        @click="editing = true"
+                        class="hidden group-hover:block text-gray-500 hover:text-gray-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-2.036a2.5 2.5 0 11-3.536-3.536l3.536 3.536zm-7.596 9.596a1.5 1.5 0 102.121-2.121l-7.596-7.596a1.5 1.5 0 00-2.121 2.121l7.596 7.596z" />
+                        </svg>
+                    </button>
+                    <button
+                        @click="if (document.querySelector('[x-data]')) {
+                                    $dispatch('usermessage-show', {
+                                        type: 'confirm',
+                                        title: 'Confirm Milestone Deletion',
+                                        message: 'Are you sure you want to delete this milestone?',
+                                        action: () => { $wire.deleteMilestone({{ $milestone['id'] }}) }
+                                    });
+                                }"
+                        class="hidden group-hover:block text-red-500 hover:text-red-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                </div>
             </li>
         @endforeach
     </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- Modal -->
     @if($showModal)

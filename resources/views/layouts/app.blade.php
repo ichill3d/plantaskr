@@ -65,7 +65,7 @@
 
 @stack('modals')
 
-@livewireScripts
+@livewireScriptConfig
 
 <!-- Include pushed scripts -->
 @stack('scripts')
