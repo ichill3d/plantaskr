@@ -1,6 +1,6 @@
 <div>
     <!-- Quill Editor Container -->
-    <div id="quill-editor-{{ $name }}" class="quill-editor h-64 border rounded-md" style="height:120px"></div>
+    <div id="quill-editor-{{ $name }}" class="quill-editor h-64 border rounded-md" style="max-height:1000px; "></div>
     <!-- Hidden Input for Sync -->
     <input type="hidden" id="quill-input-{{ $name }}" name="{{ $name }}" wire:model.defer="{{ $name }}">
 
@@ -40,10 +40,15 @@
                 // Set initial content from Livewire-bound property
                 quill.root.innerHTML = inputElement.value;
 
+                // Automatically resize editor on content change
                 quill.on('text-change', function () {
                     inputElement.value = quill.root.innerHTML;
                     inputElement.dispatchEvent(new Event('input')); // Trigger Livewire binding
+                    adjustQuillHeight(editorElement, quill);
                 });
+
+                // Adjust height on initialization
+                adjustQuillHeight(editorElement, quill);
 
                 console.log('Quill editor initialized:', editorSelector);
             }
