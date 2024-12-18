@@ -42,7 +42,7 @@
                             <a href="{{ asset('storage/' . $attachment->file_path) }}"
                                target="_blank"
                                class="w-full h-32 bg-gray-200 flex items-center justify-center rounded-md text-gray-600">
-                                <span class="text-sm font-semibold">{{ strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)) }}</span>
+                                <div class="text-sm font-semibold">{{ strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)) }}</div>
                             </a>
                         @endif
 
@@ -68,7 +68,7 @@
 
                     <!-- Drop Files Here Box -->
                     <div class="w-full h-32 bg-gray-200 flex items-center justify-center rounded-md text-gray-600 border-dashed border-2 border-gray-400 relative">
-                        <div class="text-sm font-semibold">Drop Files Here</div>
+                        <div class="text-sm font-semibold text-center">Drop Files Here</div>
 
                         <!-- Hidden File Input -->
                         <input

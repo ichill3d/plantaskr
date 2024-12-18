@@ -2,6 +2,16 @@
     <!-- Main Content -->
     <div class="overflow-auto">
         <!-- Task Title -->
+        <a href="{{route('organizations.projects.show',
+                                        ['id'=>$task->team->id,
+                                        'organization_alias' => $task->team->alias,
+                                        'project_id' => $task->project->id])
+                                        }}"
+           style="background-color: {{ $task->project->color }}; color: {{ get_contrast_color($task->project->color) }}"
+             class="block text-xs font-medium mr-2 px-3 py-2 rounded-md uppercase tracking-wide mb-2 hover:opacity-75">
+            <span class="opacity-50">Project:</span> {{ $task->project->name }}
+        </a>
+
         <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ $task->name }}</h1>
 
         <!-- Task Description -->

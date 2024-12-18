@@ -24,7 +24,7 @@ class ShowTask extends Component
 
     public function mount($task)
     {
-        $this->task = Task::with(['project:id,name', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
+        $this->task = Task::with(['project:id,name,color', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
         $this->milestones = $task->project->milestones ?? [];
