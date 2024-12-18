@@ -34,7 +34,12 @@
                                         ['id'=>$task->team->id,
                                         'organization_alias' => $task->team->alias,
                                         'project_id' => $task->project->id])
-                                        }}">{{ $task->project->name }}</a></span>
+                                        }}">{{ $task->project->name }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ml-1" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
+        <path d="M5 5h7v2H6v11h11v-6h2v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>
+    </svg>
+                    </a></span>
             </li>
             <li>
                 <!-- Milestone Section -->
