@@ -6,22 +6,15 @@
 
     @script
     <script>
+        setTimeout(function () {
+            initializeQuillEditor('{{ $name }}');
+        }, 100);
 
+        Livewire.on('refreshQuillContent', function (event) {
             setTimeout(function () {
                 initializeQuillEditor('{{ $name }}');
             }, 100);
-
-            // Listen for Livewire changes and update the Quill editor
-            Livewire.on('refreshQuillContent', function (name, content) {
-                if (name === '{{ $name }}') {
-                    const editor = document.querySelector(`#quill-editor-${name}`);
-                    if (editor && editor.__quillInitialized) {
-                        const quill = Quill.find(editor);
-                        quill.root.innerHTML = content; // Update the editor content
-                    }
-                }
-            });
-
+        });
 
         function initializeQuillEditor(name) {
             const editorSelector = `#quill-editor-${name}`;
