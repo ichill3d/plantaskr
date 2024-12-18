@@ -56,7 +56,13 @@ class ShowTask extends Component
                 'project_id' => $this->task->project->id,
                 'tab' => 'tasks']);
     }
+    public function updateTaskTitle($id, $newTitle)
+    {
+        $task = Task::findOrFail($id);
+        $task->update(['name' => $newTitle]);
 
+        $this->dispatch('taskUpdated'); // Optional: Emit event to refresh other components if needed
+    }
     public function toggleAssignee($userId)
     {
         // Toggle user assignment

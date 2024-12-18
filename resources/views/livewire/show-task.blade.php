@@ -12,7 +12,37 @@
             <span class="opacity-50">Project:</span> {{ $task->project->name }}
         </a>
 
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ $task->name }}</h1>
+        <div x-data="{ editing: false, title: '{{ $task->name }}' }">
+            <h1
+                x-show="!editing"
+                class="text-2xl font-bold text-gray-800 mb-4 cursor-pointer"
+                @click="editing = true"
+            >
+                {{ $task->name }}
+            </h1>
+            <div x-show="editing" class="mb-4 w-full">
+                <input
+                    type="text"
+                    x-model="title"
+                    class="text-xl w-full font-bold text-gray-800 mb-4 border-b border-gray-400 focus:outline-none focus:border-blue-500"
+                />
+                <div class="flex space-x-2 mt-2">
+                    <button
+                        @click="$wire.updateTaskTitle({{ $task->id }}, title); editing = false"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Save
+                    </button>
+                    <button
+                        @click="editing = false; title = '{{ $task->name }}'"
+                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Task Description -->
         <div class="text-gray-600 mb-6 border rounded-md p-4">
             @if (!$isEditingDescription)
