@@ -1,15 +1,8 @@
 <?php
-
 namespace App\Livewire;
 
-use App\Models\Milestone;
-use App\Models\Task;
-use App\Models\Project;
-use App\Models\TaskPriority;
-use App\Models\TaskStatus;
-use App\Models\Team;
-use App\Models\User;
 use Livewire\Component;
+use App\Models\Task;
 use Livewire\WithPagination;
 
 class TaskList extends Component
@@ -17,134 +10,99 @@ class TaskList extends Component
     use WithPagination;
 
     public $teamId;
-    public $projectId;
-    public $milestoneId;
-    public $assigneeId;
 
-    // Add these missing properties
-    public $selectedProjects = [];
-    public $selectedPriorities = [];
-    public $selectedAssignees = [];
-    public $selectedStatuses = [];
-    public $selectedMilestones = [];
+    // Default visibility for columns
+    public $columns;
 
-    public $sortColumn = 'name';
-    public $sortDirection = 'asc';
+    public $sortColumn = 'name'; // Default sort column
+    public $sortDirection = 'asc'; // Default sort direction
 
+    public function mount()
+    {
+        $this->initializeColumns();
+    }
     public function sortBy($column)
     {
         if ($this->sortColumn === $column) {
+            // Toggle the sort direction if the column is already selected
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
+            // Otherwise, set the new sort column
             $this->sortColumn = $column;
-            $this->sortDirection = 'asc';
+            $this->sortDirection = 'asc'; // Default to ascending for a new column
         }
     }
-    public function toggleAssignee($assigneeId)
+    protected function initializeColumns()
     {
-        if (in_array($assigneeId, $this->selectedAssignees)) {
-            $this->selectedAssignees = array_filter($this->selectedAssignees, fn($id) => $id !== $assigneeId);
-        } else {
-            $this->selectedAssignees[] = $assigneeId;
-        }
-    }
-
-    public function toggleStatus($statusId)
-    {
-        if (in_array($statusId, $this->selectedStatuses)) {
-            $this->selectedStatuses = array_filter($this->selectedStatuses, fn($id) => $id !== $statusId);
-        } else {
-            $this->selectedStatuses[] = $statusId;
-        }
-    }
-
-    public function toggleMilestone($milestoneId)
-    {
-        if (in_array($milestoneId, $this->selectedMilestones)) {
-            $this->selectedMilestones = array_filter($this->selectedMilestones, fn($id) => $id !== $milestoneId);
-        } else {
-            $this->selectedMilestones[] = $milestoneId;
-        }
-    }
-    public function toggleProject($projectId)
-    {
-        if (in_array($projectId, $this->selectedProjects)) {
-            // If the project is already selected, remove it
-            $this->selectedProjects = array_filter($this->selectedProjects, fn ($id) => $id !== $projectId);
-        } else {
-            // Otherwise, add it to the selection
-            $this->selectedProjects[] = $projectId;
-        }
-    }
-    public function togglePriority($priorityId)
-    {
-        if (in_array($priorityId, $this->selectedPriorities)) {
-            // Remove the priority if it’s already selected
-            $this->selectedPriorities = array_filter($this->selectedPriorities, fn ($id) => $id !== $priorityId);
-        } else {
-            // Add the priority if it’s not selected
-            $this->selectedPriorities[] = $priorityId;
-        }
+        $this->columns = auth()->user()->task_columns ?? [
+            'priority' => true,
+            'created_time' => true,
+            'created_by' => true,
+            'assigned_users' => true,
+            'status' => true,
+            'milestone' => true,
+            'due_date' => true,
+        ];
 
     }
 
-    public function deleteTask($taskId)
+    public function updateTaskColumns($updatedColumns)
     {
-        Task::findOrFail($taskId)->delete();
+
+        $this->columns = $updatedColumns;
+
+        // Save to the database
+        $user = auth()->user();
+        $user->task_columns = $updatedColumns;
+        $user->save();
     }
+
+
+
     public function render()
     {
         $tasks = Task::query()
-            ->when($this->teamId, function ($query) {
-                $query->whereHas('project.team', fn ($teamQuery) => $teamQuery->where('id', $this->teamId));
-            })
-            ->when($this->projectId, fn ($query) => $query->where('project_id', $this->projectId))
-            ->when($this->milestoneId, fn ($query) => $query->where('milestone_id', $this->milestoneId))
-            ->when(!empty($this->selectedProjects), fn ($query) => $query->whereIn('project_id', $this->selectedProjects))
-            ->when(!empty($this->selectedPriorities), fn ($query) => $query->whereIn('task_priorities_id', $this->selectedPriorities))
-            ->when(!empty($this->selectedAssignees), fn($query) =>
-            $query->whereHas('assignees', fn($q) => $q->whereIn('users.id', $this->selectedAssignees))
-            )
-            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('task_status_id', $this->selectedStatuses))
-            ->when(!empty($this->selectedMilestones), fn($query) => $query->whereIn('milestone_id', $this->selectedMilestones))
-            ->when($this->sortColumn === 'task_priorities_id', function ($query) {
-                $query->join('task_priorities', 'tasks.task_priorities_id', '=', 'task_priorities.id')
-                    ->select('tasks.*')
-                    ->orderBy('task_priorities.name', $this->sortDirection);
-            }, fn ($query) => $query->orderBy($this->sortColumn ?? 'name', $this->sortDirection))
+            ->whereHas('project.team', fn($query) => $query->where('id', $this->teamId))
             ->with([
-                'project:id,name',
                 'priority:id,name',
-                'assignees:id,name'
+                'creator:id,name',
+                'assignees:id,name',
+                'status:id,name',
+                'milestone:id,name',
+                'project:id,name',
             ])
-            ->paginate(10);
+            ->when($this->sortColumn === 'project.name', function ($query) {
+                $query->join('projects as p', 'tasks.project_id', '=', 'p.id')
+                    ->select('tasks.*')
+                    ->orderBy('p.id', $this->sortDirection);
+            })
+            ->when($this->sortColumn === 'priority.name', function ($query) {
+                $query->join('task_priorities as tp', 'tasks.task_priorities_id', '=', 'tp.id')
+                    ->select('tasks.*')
+                    ->orderBy('tp.id', $this->sortDirection); // Sort by task_priorities.id
+            })
+            ->when($this->sortColumn === 'm.name', function ($query) {
+                $query->leftJoin('milestones as m', 'tasks.milestone_id', '=', 'm.id')
+                    ->select('tasks.*')
+                    ->orderByRaw("ISNULL(m.name) {$this->sortDirection}, m.name {$this->sortDirection}");
+            })
 
+            ->when($this->sortColumn === 'u.name', function ($query) {
+                $query->join('users as u', 'tasks.created_by_user_id', '=', 'u.id')
+                    ->select('tasks.*') // Keep the task data intact
+                    ->orderBy('u.name', $this->sortDirection); // Sort by the alias
+            })
 
-        if(!is_null($this->projectId)) {
-            $project = Project::find($this->projectId);
-            $team = $project->team;
-        } else {
-            $team = Team::find($this->teamId);
-        }
+            ->when(!in_array($this->sortColumn, ['project.name', 'priority.name']), function ($query) {
+                $query->orderBy($this->sortColumn, $this->sortDirection);
+            })
+            ->get();
 
-
-        $projects = $team->projects()->limit(10)->get();
-        $priorities = TaskPriority::limit(10)->get();
-        $members = $team->members()->limit(10)->get();
-        $creator = $team->creator()->select(['id', 'name', 'profile_photo_path'])->first();
-        $assignees = $members->contains($creator) ? $members : $members->push($creator);
-        $statuses = TaskStatus::limit(10)->get(); // Replace with your status model
-
-        if (!is_null($this->projectId)) {
-            $project = Project::find($this->projectId);
-            $milestones = $project->milestones()->limit(10)->get();
-        } else {
-            $milestones = collect(); // Use an empty collection instead of an empty array
-        }
-
-        return view('livewire.task-list', compact('tasks', 'projects', 'priorities', 'assignees', 'statuses', 'milestones'));
-
+        return view('livewire.task-list', [
+            'tasks' => $tasks,
+            'columns' => $this->columns,
+        ]);
     }
 
-
 }
+

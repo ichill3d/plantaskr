@@ -67,6 +67,10 @@ class User extends Authenticatable
         ];
     }
 
+    protected $casts = [
+        'task_columns' => 'array', // Automatically cast JSON to an array
+    ];
+
 
 
     public function organizationTeams()
