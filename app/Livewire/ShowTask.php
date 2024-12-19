@@ -26,12 +26,11 @@ class ShowTask extends Component
     public $isEditingDescription = false;
 
 
-
     public function mount($task)
     {
         $this->task = Task::with(['project:id,name,color', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
 
-        $this->task->description = Purifier::clean($this->task->description);
+        //$this->task->description = Purifier::clean($this->task->description);
         $this->description = $this->task->description;
         $this->statuses = TaskStatus::all();
         $this->priorities = TaskPriority::all();
@@ -63,6 +62,11 @@ class ShowTask extends Component
 
         $this->dispatch('taskUpdated'); // Optional: Emit event to refresh other components if needed
     }
+    public function autosave()
+    {
+       return true;
+    }
+
     public function toggleAssignee($userId)
     {
         // Toggle user assignment
@@ -110,18 +114,11 @@ class ShowTask extends Component
 
     public function toggleEditDescription()
     {
-        $this->isEditingDescription = !$this->isEditingDescription;
-
-        if ($this->isEditingDescription) {
-            // Dispatch event to reinitialize the editor with current content
-            $this->dispatch('refreshQuillContent', [
-                'name' => 'description',
-                'content' => $this->description,
-            ]);
-        }
+        $this->isEditingDescription = true;
     }
     public function saveDescription()
     {
+        logger('Description recieved:',  ['value' => $this->description]);
         $this->validate([
             'description' => 'required|string|min:3',
         ]);
