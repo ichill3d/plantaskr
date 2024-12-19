@@ -45,20 +45,13 @@ async function handleFiles(currentEditor, files, pos = null) {
     }
 }
 
-window.Alpine.data('editor', (content, wireModel) => {
-    let editor
+window.Alpine.data('editor', (initialContent, wireModel) => {
+    let editor;
     return {
-        updatedAt: Date.now(), // force Alpine to rerender on selection change
+        content: initialContent, // Define content in the Alpine.js state
+        updatedAt: Date.now(),   // To force updates
         init() {
-            const _this = this
-
-            // Get taskId and projectId from the DOM
-            const taskId = this.$el.getAttribute('data-task-id');
-            const projectId = this.$el.getAttribute('data-project-id');
-
-            const plainContent = typeof content === 'object' && content.initialValue
-                ? content.initialValue
-                : content;
+            const _this = this;
 
             editor = new Editor({
                 element: this.$refs.element,
@@ -77,40 +70,41 @@ window.Alpine.data('editor', (content, wireModel) => {
                         },
                     }),
                 ],
-                content: plainContent || '',
-                onCreate({ editor }) {
-
-                    _this.updatedAt = Date.now()
-                },
+                content: this.content || '', // Initialize editor with content from Alpine.js
                 onUpdate({ editor }) {
-                    content = editor.getHTML();
+                    const newContent = editor.getHTML();
                     if (wireModel) {
-                        wireModel(content); // Sync changes to Livewire
+                        wireModel(newContent); // Sync changes to Livewire
                     }
-                    _this.updatedAt = Date.now()
+                    this.content = newContent; // Update Alpine.js state
+                    this.updatedAt = Date.now();
                 },
-                onSelectionUpdate({ editor }) {
-                    _this.updatedAt = Date.now()
-                },
-            })
+            });
+
+            // Watch Livewire for updates to reset editor content
+            this.$watch('content', (newContent) => {
+                if (editor.getHTML() !== (newContent || '')) {
+                    editor.commands.setContent(newContent || '', false);
+                }
+            });
         },
         isLoaded() {
-            return editor
+            return !!editor;
         },
         isActive(type, opts = {}) {
-            return editor.isActive(type, opts)
+            return editor.isActive(type, opts);
         },
         toggleHeading(opts) {
-            editor.chain().toggleHeading(opts).focus().run()
+            editor.chain().toggleHeading(opts).focus().run();
         },
         toggleBold() {
-            editor.chain().focus().toggleBold().run()
+            editor.chain().focus().toggleBold().run();
         },
         toggleBulletList() {
-            editor.chain().focus().toggleBulletList().run()
+            editor.chain().focus().toggleBulletList().run();
         },
         toggleItalic() {
-            editor.chain().toggleItalic().focus().run()
+            editor.chain().toggleItalic().focus().run();
         },
     };
 });

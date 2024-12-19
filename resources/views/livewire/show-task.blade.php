@@ -76,9 +76,7 @@
         <!-- Discussion Section -->
         <div>
             <h2 class="text-lg font-semibold text-gray-700 mb-2">Discussion</h2>
-            <div class="border rounded-md p-4 bg-gray-50">
-                <p class="text-gray-500">No comments yet.</p>
-            </div>
+                <livewire:comments type="tasks" :parentId="$task->id" />
         </div>
     </div>
 

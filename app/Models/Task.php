@@ -28,7 +28,10 @@ class Task extends Model
     {
         return $this->belongsTo(Project::class);
     }
-
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'parent');
+    }
     public function status()
     {
         return $this->belongsTo(TaskStatus::class, 'task_status_id');

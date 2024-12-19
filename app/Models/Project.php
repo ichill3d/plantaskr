@@ -17,7 +17,10 @@ class Project extends Model
             ->withPivot('project_roles_id')
             ->withTimestamps();
     }
-
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'parent');
+    }
     // Relationship with tasks
     public function tasks()
     {

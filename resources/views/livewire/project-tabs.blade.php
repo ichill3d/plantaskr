@@ -48,7 +48,7 @@
         @elseif ($tab === 'discussion')
             <div>
                 <h2 class="text-lg font-semibold text-gray-800">Discussion</h2>
-                <p class="text-gray-600 mt-2">Content for the Discussion tab.</p>
+                <livewire:comments type="projects" :parentId="$project->id" />
             </div>
         @elseif ($tab === 'files')
             <div>
