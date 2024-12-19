@@ -1,6 +1,8 @@
 <?php
 namespace App\Livewire;
 
+use App\Models\TaskPriority;
+use App\Models\TaskStatus;
 use Livewire\Component;
 use App\Models\Task;
 use Livewire\WithPagination;
@@ -10,12 +12,18 @@ class TaskList extends Component
     use WithPagination;
 
     public $teamId;
+    public $projectId;
 
     // Default visibility for columns
     public $columns;
 
     public $sortColumn = 'name'; // Default sort column
     public $sortDirection = 'asc'; // Default sort direction
+
+    public $selectedStatuses = [];
+    public $selectedPriorities = [];
+    public $selectedUsers = [];
+    public $selectedProjects = [];
 
     public function mount()
     {
@@ -63,13 +71,18 @@ class TaskList extends Component
     {
         $tasks = Task::query()
             ->whereHas('project.team', fn($query) => $query->where('id', $this->teamId))
+            ->when($this->projectId, fn($query) => $query->where('project_id', $this->projectId)) // Filter by projectId
+            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('task_status_id', $this->selectedStatuses)) // Filter by selected statuses
+            ->when(!empty($this->selectedPriorities), fn($query) => $query->whereIn('task_priorities_id', $this->selectedPriorities)) // Filter by selected priorities
+            ->when(!empty($this->selectedUsers), fn($query) => $query->whereHas('assignees', fn($query) => $query->whereIn('users.id', $this->selectedUsers))) // Filter by assigned users
+            ->when(!empty($this->selectedProjects), fn($query) => $query->whereIn('project_id', $this->selectedProjects)) // Filter by selected projects
             ->with([
                 'priority:id,name',
                 'creator:id,name',
                 'assignees:id,name',
                 'status:id,name',
                 'milestone:id,name',
-                'project:id,name',
+                'project:id,name,color',
             ])
             ->when($this->sortColumn === 'project.name', function ($query) {
                 $query->join('projects as p', 'tasks.project_id', '=', 'p.id')
@@ -86,23 +99,35 @@ class TaskList extends Component
                     ->select('tasks.*')
                     ->orderByRaw("ISNULL(m.name) {$this->sortDirection}, m.name {$this->sortDirection}");
             })
-
             ->when($this->sortColumn === 'u.name', function ($query) {
                 $query->join('users as u', 'tasks.created_by_user_id', '=', 'u.id')
                     ->select('tasks.*') // Keep the task data intact
                     ->orderBy('u.name', $this->sortDirection); // Sort by the alias
             })
-
             ->when(!in_array($this->sortColumn, ['project.name', 'priority.name']), function ($query) {
                 $query->orderBy($this->sortColumn, $this->sortDirection);
             })
             ->get();
 
+        $team = auth()->user()->currentTeam;
+
+        $statuses = TaskStatus::all(); // Fetch available statuses
+        $priorities = TaskPriority::all(); // Fetch available priorities
+        $users = $team->members()
+            ->get()
+            ->merge([$team->creator]); // Get team members
+        $projects = $team->projects()->get(); // Get team projects
+
         return view('livewire.task-list', [
             'tasks' => $tasks,
+            'statuses' => $statuses,
+            'priorities' => $priorities,
+            'users' => $users,
+            'projects' => $projects,
             'columns' => $this->columns,
         ]);
     }
+
 
 }
 

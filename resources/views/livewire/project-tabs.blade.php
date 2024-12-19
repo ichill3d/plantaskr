@@ -56,7 +56,7 @@
             </div>
         @elseif ($tab === 'tasks')
             <div>
-                <livewire:task-list :project-id="$project->id" />
+                <livewire:task-list :project-id="$project->id" :team-id="$project->team_id" />
             </div>
         @elseif ($tab === 'milestones')
             <div>

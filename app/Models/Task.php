@@ -95,13 +95,17 @@ class Task extends Model
     }
     public function getPriorityColorAttribute()
     {
-        return match ($this->priority) {
-            'high' => 'red-500',
-            'medium' => 'yellow-500',
-            'low' => 'green-500',
-            default => 'gray-500',
+        $priorityName = $this->priority->name ?? null; // Fetch related priority name, or null if not set
+
+        return match ($priorityName) {
+            'Urgent' => '#D90000',
+            'High' => '#FF8000',
+            'Medium' => '#2DA8F2',
+            'Low' => '#7ECE13',
+            default => '#808080',
         };
     }
+
     public function getIsOverdueAttribute()
     {
         return $this->due_date && Carbon::parse($this->due_date)->isPast();
