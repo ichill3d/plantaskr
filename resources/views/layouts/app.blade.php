@@ -72,7 +72,7 @@
 
 <script>
     document.addEventListener('usermessage-show', event => {
-        const userMessageComponent = document.querySelector('[x-data][x-cloak]');
+        const userMessageComponent = document.querySelector('#user-message');
         if (userMessageComponent) {
             userMessageComponent.dispatchEvent(new CustomEvent('show-message', { detail: event.detail }));
         }

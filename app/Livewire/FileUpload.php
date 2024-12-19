@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Attachment;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Http\Request;
 
 class FileUpload extends Component
 {
@@ -15,6 +16,8 @@ class FileUpload extends Component
     public $taskId = null; // Task ID for attachment
     public $projectId = null; // Project ID for attachment
     public $attachments = []; // Holds current file list
+
+    protected $listeners = ['refreshAttachments' => 'loadAttachments'];
 
     public function mount($taskId = null, $projectId = null)
     {
@@ -26,9 +29,9 @@ class FileUpload extends Component
 
     public function loadAttachments()
     {
+
         // Load attachments for tasks or projects dynamically
         $query = Attachment::query();
-
         if ($this->taskId) {
             $query->whereHas('tasks', fn($q) => $q->where('tasks.id', $this->taskId)
                 ->whereHas('project.team', fn($teamQ) => $teamQ->where('id', auth()->user()->current_team_id)));
@@ -36,7 +39,6 @@ class FileUpload extends Component
             $query->whereHas('projects', fn($q) => $q->where('projects.id', $this->projectId)
                 ->where('team_id', auth()->user()->current_team_id));
         }
-
         $this->attachments = $query->latest()->get();
     }
     public function updatedFiles()
@@ -114,6 +116,43 @@ class FileUpload extends Component
 
         // Optional: Flash a success message
         session()->flash('success', 'File deleted successfully.');
+    }
+
+    public function handleFileDrop(Request $request)
+    {
+        $file = $request->file('file'); // Retrieve the uploaded file
+
+        if (!$file || !$file->isValid()) {
+            return response()->json(['error' => 'Invalid file upload.'], 422);
+        }
+
+        // Validate the file
+        $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt|max:5120',
+        ]);
+
+        // Store the file
+        $path = $file->store('attachments', 'public');
+
+        // Save the attachment
+        $attachment = Attachment::create([
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'uploaded_by' => auth()->id(),
+        ]);
+        $this->taskId = $request->taskId;
+        $this->projectId = $request->projectId;
+        // Attach to task or project
+        if ($this->taskId) {
+            $attachment->tasks()->attach($this->taskId, ['is_reference' => false]);
+        } elseif ($request->projectId) {
+            $attachment->projects()->attach($request->projectId);
+        }
+        $this->loadAttachments();
+        // Return the URL to the uploaded file
+        return response()->json([
+            'url' => \Storage::url($path),
+        ]);
     }
 
 

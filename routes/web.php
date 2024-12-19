@@ -6,6 +6,7 @@ use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\LabelController;
+use App\Livewire\FileUpload;
 
 // Root route
 Route::get('/', function () {
@@ -16,6 +17,7 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     // Route for listing user organizations
 //    Route::get('/my-organizations', [TeamController::class, 'listUserTeams'])->name('organizations.index');
+    Route::post('/upload-file-endpoint', [FileUpload::class, 'handleFileDrop'])->name('fileupload.drop');
 
     // Nested routes for organizations
     Route::prefix('{id}/{organization_alias}')->group(function () {

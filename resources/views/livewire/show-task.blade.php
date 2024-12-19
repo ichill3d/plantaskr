@@ -43,16 +43,21 @@
             </div>
         </div>
 
+
+
+
         <!-- Task Description -->
         <div class="text-gray-600 mb-6 border rounded-md p-4">
             @if (!$isEditingDescription)
-                <div class="cursor-pointer"  wire:click="toggleEditDescription">
-
+                <div class="cursor-pointer prose prose-ul:py-1 prose-ul:mt-1     " wire:click="toggleEditDescription">
                     {!! $description !!}
                 </div>
             @else
                 <div>
-                    <x-quill-editor name="description" />
+                    <x-tiptap
+                        wire:model="description"
+                        taskId="{{ $task->id }}"
+                    ></x-tiptap>
                     <div class="mt-2">
                         <button wire:click="saveDescription" class="btn btn-primary">Save</button>
                         <button wire:click="$set('isEditingDescription', false)" class="btn btn-secondary">Cancel</button>
@@ -60,6 +65,7 @@
                 </div>
             @endif
         </div>
+
 
         <!-- Files Section -->
         <div class="mb-6">

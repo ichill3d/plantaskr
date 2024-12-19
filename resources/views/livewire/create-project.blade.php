@@ -23,7 +23,9 @@
                         <!-- Description -->
                         <div class="mb-4">
                             <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                            <x-quill-editor :key="$showModal" name="description" />
+                            <x-tiptap
+                                wire:model="description"
+                            ></x-tiptap>
                             @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
