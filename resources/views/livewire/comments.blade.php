@@ -19,7 +19,7 @@
         @forelse($comments as $comment)
             <div class="p-4 border rounded-md">
                 <div class="text-sm text-gray-600">{{ $comment->user->name }} - {{ $comment->created_at->diffForHumans() }}</div>
-                <div class="prose">{!! $comment->content !!}</div>
+                <div class="prose prose-compact">{!! $comment->content !!}</div>
                 <livewire:comment-reactions :commentId="$comment->id" />
             </div>
         @empty

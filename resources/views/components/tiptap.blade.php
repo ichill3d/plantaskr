@@ -63,6 +63,6 @@
     </template>
     <div
         x-ref="element"
-        class="p-4 border rounded-md min-h-[200px] bg-white focus:outline-none prose prose-sm  xl:prose-lg"
+        class="p-4 border rounded-md min-h-[200px] bg-white focus:outline-none prose prose-compact"
     ></div>
 </div>

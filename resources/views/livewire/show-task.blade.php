@@ -49,7 +49,7 @@
         <!-- Task Description -->
         <div class="text-gray-600 mb-6 border rounded-md p-4">
             @if (!$isEditingDescription)
-                <div class="cursor-pointer prose prose-ul:py-1 prose-ul:mt-1     " wire:click="toggleEditDescription">
+                <div class="cursor-pointer prose prose-compact" wire:click="toggleEditDescription">
                     {!! $description !!}
                 </div>
             @else
