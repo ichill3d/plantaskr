@@ -59,7 +59,7 @@ jobs:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
       - name: Deploy to App Engine
-        run: gcloud app deploy --version=v1 --promote --set-env-vars DB_CONNECTION=mysql,DB_HOST=plantaskr-445021:europe-central2:plantaskr,DB_PORT=3306,DB_DATABASE=plantaskr,DB_USERNAME=plantaskr_user,DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        run: gcloud app deploy --version=v1 --promote --set-env-vars 'DB_CONNECTION=mysql,DB_HOST=***:europe-central2:plantaskr,DB_PORT=3306,DB_DATABASE=plantaskr,DB_USERNAME=plantaskr_user,DB_PASSWORD=${{ secrets.DB_PASSWORD }}'
 
 
       - name: Wait for App Engine instance to start
