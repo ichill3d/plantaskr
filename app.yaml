@@ -13,10 +13,3 @@ automatic_scaling:
   max_idle_instances: automatic
   min_pending_latency: automatic
   max_pending_latency: automatic
-
-skip_files:
-  - ^node_modules/.*$
-  - ^vendor/.*$
-  - ^storage/.*$
-  - ^\.git/.*$
-  - ^\.env.*$
