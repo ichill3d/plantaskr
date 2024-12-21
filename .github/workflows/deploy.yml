@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Or your preferred Node.js version
+          node-version: '18'
 
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
@@ -30,36 +30,23 @@ jobs:
       - name: Publish Livewire Assets
         run: php artisan vendor:publish --tag=livewire:assets --force
 
-      - name: Clear Cache
-        run: |
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan view:clear
-          php artisan route:clear
-
       - name: Install npm dependencies
-        run: npm ci # or npm install
+        run: npm ci
 
-      - name: Run Mix (or other build process)
-        run: npm run build # Or npm run production if you use that
+      - name: Run Mix
+        run: npm run build
 
       - name: Copy .env.example to .env
         run: cp .env.example .env
 
-      - name: Set APP_KEY from github secrets
-        run: echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
-
-        #database env vars
-      - name: Set DB_PASSWORD from github secrets
-        run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-      - name: Set DB_DATABASE env var
-        run: echo "DB_DATABASE=laravel_db" >> .env
-      - name: Set DB_USERNAME env var
-        run: echo "DB_USERNAME=laravel_user" >> .env
-      - name: Set DB_HOST env var
-        run: echo "DB_HOST=YOUR_CLOUD_SQL_CONNECTION_NAME" >> .env
-      - name: Set DB_CONNECTION env var
-        run: echo "DB_CONNECTION=mysql" >> .env
+      - name: Set Environment Variables
+        run: |
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_DATABASE=laravel_db" >> .env
+          echo "DB_USERNAME=laravel_user" >> .env
+          echo "DB_HOST=YOUR_CLOUD_SQL_CONNECTION_NAME" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -68,10 +55,28 @@ jobs:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
       - name: Deploy to App Engine
-        run: gcloud app deploy --version=v1 --promote
+        run: gcloud app deploy --version=v1 --promote --set-env-vars DB_CONNECTION=mysql,DB_HOST=plantaskr-445021:europe-central2:plantaskr,DB_PORT=3306,DB_DATABASE=plantaskr,DB_USERNAME=plantaskr_user,DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
       - name: Wait for App Engine instance to start
-        run: sleep 5 # Wait for 5 seconds. Adjust as needed.
+        run: |
+          MAX_RETRIES=10
+          RETRY_DELAY=5
+          for i in $(seq 1 $MAX_RETRIES); do
+            INSTANCE_STATUS=$(gcloud app instances list --format="value(vmStatus)" --filter="version.id=v1")
+            if [[ "$INSTANCE_STATUS" == "RUNNING" ]]; then
+              echo "Instance is running."
+              break
+            fi
+            echo "Waiting for instance to start... (Attempt $i/$MAX_RETRIES)"
+            sleep $RETRY_DELAY
+          done
+          if [[ "$INSTANCE_STATUS" != "RUNNING" ]]; then
+            echo "Error: Instance did not start within the timeout period."
+            exit 1
+          fi
 
       - name: Run Artisan Migrations
         run: gcloud app instances ssh --service=default --version=v1 --command="php artisan migrate --force || exit 1"
+
+      - name: Clear Cache (On App Engine Instance)
+        run: gcloud app instances ssh --service=default --version=v1 --command="php artisan cache:clear && php artisan config:clear && php artisan view:clear && php artisan route:clear"
