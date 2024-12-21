@@ -10,32 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Setup PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, xml, tokenizer, gd, mysql, zip
 
+      # 3. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
+      # 4. Install Composer Dependencies
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
+      # 5. Publish Livewire Assets
       - name: Publish Livewire Assets
         run: php artisan vendor:publish --tag=livewire:assets --force
 
+      # 6. Install npm Dependencies and Build Assets
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Run Mix
+      - name: Build Frontend Assets
         run: npm run build
 
+      # 7. Environment Setup
       - name: Copy .env.example to .env
         run: cp .env.example .env
 
@@ -48,24 +55,40 @@ jobs:
           echo "DB_HOST=plantaskr-445021:europe-central2:plantaskr" >> .env
           echo "DB_CONNECTION=mysql" >> .env
           echo "FILESYSTEM_DISK=gcs" >> .env
-          echo "GCS_BUCKET=plantaskr_bucket" >> .env # Or use a secret if it needs to be secret
+          echo "GCS_BUCKET=plantaskr_bucket" >> .env
+          echo "APP_STORAGE=/tmp" >> .env
+          echo "CACHE_DRIVER=file" >> .env
+          echo "SESSION_DRIVER=file" >> .env
           echo "GOOGLE_APPLICATION_CREDENTIALS_JSON='${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'" >> .env
 
-
+      # 8. Authenticate with Google Cloud
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
 
+      # 9. Set Up Google Cloud SDK
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
+      # 10. Prepare Laravel Cache and Storage Paths
+      - name: Prepare Laravel Cache and Storage
+        run: |
+          mkdir -p storage/framework/{cache,data,sessions,testing,views}
+          mkdir -p bootstrap/cache
+          chmod -R 775 storage
+          chmod -R 775 bootstrap/cache
+          php artisan cache:clear
+          php artisan config:cache
+          php artisan view:cache
 
+      # 11. Deploy to App Engine
       - name: Deploy to App Engine
-        run: gcloud app deploy --version=v1 --promote
+        run: gcloud app deploy --version=v1 --promote --quiet
 
+      # 12. Wait for Instance to Start
       - name: Wait for App Engine instance to start
         run: |
           MAX_RETRIES=10
@@ -84,8 +107,12 @@ jobs:
             exit 1
           fi
 
+      # 13. Run Artisan Migrations
       - name: Run Artisan Migrations
-        run: gcloud app instances ssh --service=default --version=v1 --command="php artisan migrate --force || exit 1"
+        run: |
+          gcloud app instances ssh --service=default --version=v1 --command="php artisan migrate --force"
 
+      # 14. Clear Cache on App Engine Instance
       - name: Clear Cache (On App Engine Instance)
-        run: gcloud app instances ssh --service=default --version=v1 --command="php artisan cache:clear && php artisan config:clear && php artisan view:clear && php artisan route:clear"
+        run: |
+          gcloud app instances ssh --service=default --version=v1 --command="php artisan cache:clear && php artisan config:clear && php artisan view:clear && php artisan route:clear"
