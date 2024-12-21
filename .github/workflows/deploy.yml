@@ -43,10 +43,11 @@ jobs:
         run: |
           echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_DATABASE=laravel_db" >> .env
-          echo "DB_USERNAME=laravel_user" >> .env
-          echo "DB_HOST=YOUR_CLOUD_SQL_CONNECTION_NAME" >> .env
+          echo "DB_DATABASE=plantaskr" >> .env
+          echo "DB_USERNAME=plantaskr_user" >> .env
+          echo "DB_HOST=plantaskr-445021:europe-central2:plantaskr" >> .env
           echo "DB_CONNECTION=mysql" >> .env
+
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
@@ -58,9 +59,9 @@ jobs:
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
-      - name: Deploy to App Engine
-        run: gcloud app deploy --version=v1 --promote --set-env-vars 'DB_CONNECTION=mysql,DB_HOST=***:europe-central2:plantaskr,DB_PORT=3306,DB_DATABASE=plantaskr,DB_USERNAME=plantaskr_user,DB_PASSWORD=${{ secrets.DB_PASSWORD }}'
 
+      - name: Deploy to App Engine
+        run: gcloud app deploy --version=v1 --promote --env-from-file=.env
 
       - name: Wait for App Engine instance to start
         run: |
