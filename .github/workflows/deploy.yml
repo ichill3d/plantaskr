@@ -47,6 +47,9 @@ jobs:
           echo "DB_USERNAME=plantaskr_user" >> .env
           echo "DB_HOST=plantaskr-445021:europe-central2:plantaskr" >> .env
           echo "DB_CONNECTION=mysql" >> .env
+          echo "FILESYSTEM_DISK=gcs" >> .env
+          echo "GCS_BUCKET=plantaskr_bucket" >> .env # Or use a secret if it needs to be secret
+          echo "GOOGLE_APPLICATION_CREDENTIALS_JSON='${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'" >> .env
 
 
       - name: Authenticate to Google Cloud

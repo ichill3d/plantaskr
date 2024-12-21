@@ -56,6 +56,11 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
+        'gcs' => [
+            'driver' => 'gcs',
+            'bucket' => env('GCS_BUCKET', 'plantaskr_bucket'), // Add this line
+            'keyFile' => json_decode(getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'), true),
+        ],
 
     ],
 
