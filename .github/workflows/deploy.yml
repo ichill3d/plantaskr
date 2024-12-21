@@ -61,7 +61,7 @@ jobs:
 
 
       - name: Deploy to App Engine
-        run: gcloud app deploy --version=v1 --promote --env-from-file=.env
+        run: gcloud app deploy --version=v1 --promote
 
       - name: Wait for App Engine instance to start
         run: |
