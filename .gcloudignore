@@ -1,0 +1,40 @@
+# Laravel Folders to Exclude
+/vendor/
+/node_modules/
+/storage/
+.env
+.env.*
+/public/storage
+/public/hot
+
+# IDE and Editor Specific Files
+*.log
+*.cache
+.DS_Store
+.idea/
+.vscode/
+
+# Git Files
+.git/
+.gitignore
+
+# Build Artifacts
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+composer.lock
+package-lock.json
+
+# Test and Cache Files
+/tests/
+.phpunit.result.cache
+/.phpunit.result.cache
+
+# Miscellaneous
+*.bak
+*.tmp
+
+# Exclude Documentation Files
+README.md
+LICENSE
+docs/
