@@ -52,7 +52,7 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_DATABASE=plantaskr" >> .env
           echo "DB_USERNAME=plantaskr_user" >> .env
-          echo "DB_HOST=/cloudsql/plantaskr-445021:europe-central2:plantaskr" >> .env
+          echo "DB_HOST=plantaskr-445021:europe-central2:plantaskr" >> .env # Correct format
           echo "DB_CONNECTION=mysql" >> .env
           echo "FILESYSTEM_DISK=gcs" >> .env
           echo "GCS_BUCKET=plantaskr_bucket" >> .env
