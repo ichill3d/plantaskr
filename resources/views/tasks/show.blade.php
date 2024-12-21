@@ -1,4 +1,4 @@
 @extends('layouts.sections.organization')
 @section('content')
-<livewire:show-task :task="$task" />
+<livewire:show-task :taskId="$task->id" />
 @endsection

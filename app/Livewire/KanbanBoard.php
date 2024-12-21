@@ -25,21 +25,70 @@ class KanbanBoard extends Component
         $query = Task::query()
             ->with(['priority', 'status', 'project', 'assignees'])
             ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
-            ->get()->groupBy('task_status_id')
+            ->orderBy('task_status_id') // Ensure tasks are ordered by status first
+            ->orderBy('board_position') // Then order tasks by board position
+            ->get()
+            ->groupBy('task_status_id')
             ->toArray();
+
         $this->tasks = $query;
     }
 
-    public function updateTaskStatus($taskId, $statusId)
+
+    public function updateTaskOrder($statusId, $taskOrder)
     {
-        if ($taskId && $statusId) {
-            $task = Task::find($taskId);
-            if ($task) {
-                $task->update(['task_status_id' => $statusId]);
-                $this->loadTasks(); // Reload tasks to reflect the change
+        // Ensure tasks belong to the correct team and status
+        $tasks = Task::where('task_status_id', $statusId)
+            ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
+            ->get()
+            ->keyBy('id');
+
+        // Reorder tasks based on the received taskOrder
+        foreach ($taskOrder as $index => $taskId) {
+            if (isset($tasks[$taskId])) {
+                $tasks[$taskId]->update(['board_position' => $index + 1]);
             }
         }
+
+        // Reload tasks to reflect updated order
+        $this->loadTasks();
     }
+
+    public function updateTaskStatus($taskId, $statusId, $position)
+    {
+
+        $task = Task::find($taskId);
+
+        if ($task) {
+            // Update the task status
+            $task->task_status_id = $statusId;
+            $task->save();
+            // Fetch tasks in the same status and reorder
+            $tasks = Task::where('task_status_id', $statusId)
+                ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
+                ->orderBy('board_position')
+                ->get();
+
+            // Remove the moved task from the list
+            $tasks = $tasks->reject(fn($t) => $t->id == $task->id);
+
+            // Insert the moved task into the desired position
+            $tasks->splice($position, 0, [$task]);
+
+            // Update board_position for all tasks
+            foreach ($tasks as $index => $t) {
+                $t->update(['board_position' => $index + 1]);
+            }
+
+            $this->loadTasks(); // Reload tasks to reflect changes
+        }
+    }
+
+
+
+
+
+
 
 
 

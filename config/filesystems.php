@@ -36,6 +36,12 @@ return [
             'serve' => true,
             'throw' => false,
         ],
+        'production' => [
+            'driver' => 'local',
+            'root' => '/mnt/volume_fra1_01/storage',
+            'serve' => true,
+            'throw' => false,
+        ],
 
         'public' => [
             'driver' => 'local',

@@ -26,8 +26,9 @@ class ShowTask extends Component
     public $isEditingDescription = false;
 
 
-    public function mount($task)
+    public function mount($taskId)
     {
+        $task = Task::findOrFail($taskId);
         $this->task = Task::with(['project:id,name,color', 'priority:id,name', 'assignees:id,name,profile_photo_path'])->findOrFail($task->id);
 
         //$this->task->description = Purifier::clean($this->task->description);

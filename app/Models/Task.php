@@ -17,7 +17,8 @@ class Task extends Model
         'name',
         'description',
         'due_date',
-        'created_by_user_id'
+        'created_by_user_id',
+        'board_position'
     ];
     protected $appends = ['priority_color', 'is_overdue'];
     protected $casts = [
