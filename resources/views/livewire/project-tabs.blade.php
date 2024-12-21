@@ -33,10 +33,16 @@
 {{--            Members--}}
 {{--        </button>--}}
         <button
+            wire:click="setTab('board')"
+            class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'board' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">
+            Kanban Board
+        </button>
+        <button
             wire:click="setTab('settings')"
             class="py-2 px-4 text-sm font-medium text-gray-600 border-b-2 {{ $tab === 'settings' ? 'border-blue-500 text-blue-500' : 'border-transparent hover:text-gray-800 hover:border-gray-300' }}">
             Settings
         </button>
+
     </nav>
 
     <!-- Tab Content -->
@@ -57,6 +63,7 @@
         @elseif ($tab === 'tasks')
             <div>
                 <livewire:task-list :project-id="$project->id" :team-id="$project->team_id" />
+
             </div>
         @elseif ($tab === 'milestones')
             <div>
@@ -67,12 +74,20 @@
 {{--                <h2 class="text-lg font-semibold text-gray-800">Members</h2>--}}
 {{--                <p class="text-gray-600 mt-2">Content for the Members tab.</p>--}}
 {{--            </div>--}}
+        @elseif ($tab === 'board')
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Project Board</h2>
+                <livewire:kanban-board :teamId="$project->team_id" />
+
+            </div>
+
         @elseif ($tab === 'settings')
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Project Settings</h2>
                 <livewire:edit-project :project="$project" />
             </div>
         @endif
+
     </div>
 </div>
 

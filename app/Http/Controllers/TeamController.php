@@ -80,6 +80,19 @@ class TeamController extends Controller
         $tasks = $team->tasks;
         return view('teams.tasks', compact('team', 'tasks'));
     }
+public function board($id, $organization_alias)
+    {
+        $team = Team::find( $id);
+
+        // Redirect to the correct URL if the alias doesn't match
+        if ($team->alias !== $organization_alias) {
+            return redirect()->route('organizations.members', [
+                'id' => $team->id,
+                'organization_alias' => $team->alias,
+            ], 301);
+        }
+        return view('teams.board', compact('team'));
+    }
 
     public function membersManagement($id, $organization_alias)
     {

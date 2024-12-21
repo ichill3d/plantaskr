@@ -1,14 +1,8 @@
 <div class="relative h-full overflow-y-auto max-h-[calc(100vh-10rem)]">
 
-    @php
-        $enabledColumns = collect($columns)->filter(fn($isEnabled) => $isEnabled); // Filter enabled columns
-        $lastColumn = $enabledColumns->keys()->last(); // Get the last enabled column key
-        $enabledColumnsCount = collect($columns)->filter(fn($isEnabled) => $isEnabled)->count(); // Count enabled columns
-
-    @endphp
     <!-- Header -->
-    <div class="sticky top-0 z-10 bg-white shadow text-sm font-semibold text-gray-600  border-b pb-2">
-        <div class="flex flex-row gap-4 w-full justify-between  px-4 py-2 "
+    <div x-data="{ toggleAllFilters: false }" class="sticky top-0 z-10 bg-white shadow text-sm font-semibold text-gray-600  border-b pb-2">
+        <div  class="flex flex-row gap-4 w-full justify-between  px-4 py-2 "
              style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
             <div class="flex items-start justify-start gap-2" >
                 <div class=" text-left cursor-pointer" wire:click="sortBy('name')">
@@ -18,12 +12,20 @@
                     @endif
                 </div>
                 <div class="relative inline-block ml-2"  x-data="{ open: false, tempColumns: @js($columns) }">
-                    <button class="text-blue-500 hover:underline" @click="open = true">[Edit Columns]</button>
-
+                    <button class="text-blue-500 hover:underline" @click="open = true">Edit Columns</button>
+                    <button
+                        class="text-blue-500 hover:underline ml-2"
+                        wire:click="clearAllFilters"
+                    >
+                        Clear All Filters
+                    </button>
+                    <button @click="toggleAllFilters = ! toggleAllFilters" class="hidden text-blue-500 hover:underline ml-2">
+                        Toggle Filters
+                    </button>
                     <!-- Dropdown -->
                     <div
                          x-show="open"
-                         class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4 z-50"
+                         class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4"
                          @click.away="open = false"
                          style="display: none;">
                         <!-- Column Options -->
@@ -54,22 +56,143 @@
                 </div>
             </div>
 
-            <div class="text-right pr-4 cursor-pointer" wire:click="sortBy('project.name')">
-                Project
-                @if($sortColumn === 'project.name')
-                    <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                @endif
+            <div x-data="{ showFilter: false, searchQuery: '' }" class="text-right pr-4 cursor-pointer">
+                <div class="flex flex-row items-center justify-end">
+                    <!-- Selected Project Filters -->
+                    <div>
+                        @foreach($selectedProjects as $projectId)
+                            @php
+                                $project = $projects->firstWhere('id', $projectId);
+                            @endphp
+                            <span class="inline-block mt-1 bg-gray-500 font-normal rounded-full px-2 py-0.5 text-xs text-white whitespace-nowrap">
+                    <span class="inline-block max-w-20 overflow-hidden align-middle">{{ $project->name }}</span>
+                    <span
+                        class="inline-block ml-2 cursor-pointer hover:text-blue-600 align-middle"
+                        @click="$refs['project_{{ $projectId }}']?.click()"
+                    >
+                        X
+                    </span>
+                </span>
+                        @endforeach
+                    </div>
+
+                    <div>
+            <span @click="showFilter = !showFilter" class="inline-block ml-1 cursor-pointer hover:bg-gray-100 rounded-full p-1 -mb-1.5">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-3 h-3"
+                >
+                    <!-- SVG Path -->
+                    <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd" />
+                </svg>
+            </span>
+                        <span wire:click="sortBy('project.name')">Project</span>
+                        @if($sortColumn === 'project.name')
+                            <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                        @endif
+
+                        <!-- Project Filter Dropdown -->
+                        <div x-show="showFilter" class="absolute -ml-44 mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <button @click="$wire.set('selectedProjects', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
+                                <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
+                            </div>
+
+                            <!-- Search Input -->
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                placeholder="Search projects..."
+                                class="w-full mb-2 p-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
+                            >
+
+                            <!-- Project List -->
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                @foreach($projects as $project)
+                                    <template x-if="searchQuery === '' || '{{ strtolower($project->name) }}'.includes(searchQuery.toLowerCase())">
+                                        <label class="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                wire:model.live="selectedProjects"
+                                                value="{{ $project->id }}"
+                                                x-ref="project_{{ $project->id }}"
+                                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                            >
+                                            <span class="text-sm">{{ $project->name }}</span>
+                                        </label>
+                                    </template>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+
         </div>
-        <div class="grid gap-4 text-sm text-gray-600 px-4 py-2"
+        <div   class="grid gap-4 text-sm text-gray-600 px-4 py-2"
              style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
 
             @if($columns['priority'])
-                <div class="col-span-1 text-left cursor-pointer {{ $lastColumn === 'priority' ? 'text-right pr-4' : '' }}" wire:click="sortBy('priority.name')">
-                    Priority
+                <div x-data="{ showFilter: false }" class="col-span-1 text-left {{ $lastColumn === 'priority' ? 'text-right pr-4' : '' }}" >
+                    <span class="cursor-pointer" wire:click="sortBy('priority.name')">Priority</span>
                     @if($sortColumn === 'priority.name')
                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                     @endif
+                    <span @click='showFilter = !showFilter' class="inline-block ml-1 cursor-pointer hover:bg-gray-100 rounded-full p-1 -mb-1.5">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="w-3 h-3"
+                        >
+                            <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+
+                    <!-- Priority Filter -->
+                    <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                        <div class="flex justify-between items-center mb-2">
+
+                            <button
+                                @click="$wire.set('selectedPriorities', [])"
+                                class="text-blue-500 text-xs hover:underline" >[Clear]</button>
+                            <button
+                                @click="showFilter = false"
+                                class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
+                        </div>
+                        <div class="space-y-2">
+                            @foreach($priorities as $priority)
+                                <label class="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        wire:model.live="selectedPriorities"
+                                        x-ref="priority_{{ $priority->id }}"
+                                        value="{{ $priority->id }}"
+                                        class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                    >
+                                    <span class="text-sm">{{ $priority->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <!-- Selected Filter Items -->
+                    <div>
+                        @foreach($selectedPriorities as $priorityId)
+                            @php
+                                $priority = $priorities->firstWhere('id', $priorityId);
+                            @endphp
+                            <span class="inline-block mt-1 bg-gray-500 font-normal rounded-full px-2 py-0.5 text-xs text-white whitespace-nowrap">
+                                <span class="inline-block max-w-20 overflow-hidden align-middle">{{ $priority->name }}</span>
+                                <span
+                                    class="inline-block ml-2 cursor-pointer hover:text-red-600 align-middle"
+                                    @click="$refs['priority_{{ $priorityId }}'].click()">X</span>
+                            </span>
+
+                        @endforeach
+                    </div>
                 </div>
             @endif
             @if($columns['created_time'])
@@ -88,17 +211,133 @@
                     @endif
                 </div>
             @endif
-            @if($columns['assigned_users'])
-                <div class="col-span-1 text-left {{ $lastColumn === 'assigned_users' ? 'text-right pr-4' : '' }}">Assigned Users</div>
-            @endif
+                @if($columns['assigned_users'])
+                    <div x-data="{ showFilter: false, searchQuery: '' }" class="col-span-1 text-left {{ $lastColumn === 'assigned_users' ? 'text-right pr-4' : '' }}">
+                        <span class="cursor-pointer" @click="showFilter = !showFilter">Assigned Users</span>
+                        <span @click="showFilter = !showFilter" class="inline-block ml-1 cursor-pointer hover:bg-gray-100 rounded-full p-1 -mb-1.5">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-3 h-3"
+            >
+                <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd" />
+            </svg>
+        </span>
+
+                        <!-- Assigned Users Filter Dropdown -->
+                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <button @click="$wire.set('selectedUsers', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
+                                <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
+                            </div>
+
+                            <!-- Search Input -->
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                placeholder="Search Assignees..."
+                                class="w-full mb-2 p-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
+                            >
+
+                            <!-- User List -->
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                @foreach($users as $user)
+                                    <template x-if="searchQuery === '' || '{{ strtolower($user->name) }}'.includes(searchQuery.toLowerCase())">
+                                        <label class="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                wire:model.live="selectedUsers"
+                                                value="{{ $user->id }}"
+                                                x-ref="user_{{ $user->id }}"
+                                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                            >
+                                            <span class="text-sm">{{ $user->name }}</span>
+                                        </label>
+                                    </template>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Selected User Filters -->
+                        <div>
+                            @foreach($selectedUsers as $userId)
+                                @php
+                                    $user = $users->firstWhere('id', $userId);
+                                @endphp
+                                <span class="inline-block mt-1 bg-gray-500 font-normal rounded-full px-2 py-0.5 text-xs text-white whitespace-nowrap">
+                    <span class="inline-block max-w-20 overflow-hidden align-middle">
+                        {{ collect(explode(' ', $user->name))->map(fn($name, $index) => $index === 0 ? $name : substr($name, 0, 1) . '.')->implode(' ') }}
+                    </span>
+                    <span
+                        class="inline-block ml-2 cursor-pointer hover:text-blue-600 align-middle"
+                        @click="$refs['user_{{ $userId }}'].click();"
+                    >
+    X
+</span>
+                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+
             @if($columns['status'])
-                <div class="col-span-1 text-left cursor-pointer {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}" wire:click="sortBy('task_status_id')">
-                    Status
-                    @if($sortColumn === 'task_status_id')
-                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                    @endif
-                </div>
-            @endif
+                    <div x-data="{ showFilter: false }" class="col-span-1 text-left {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
+                        <span class="cursor-pointer" wire:click="sortBy('task_status_id')">Status</span>
+                        @if($sortColumn === 'task_status_id')
+                            <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                        @endif
+                        <span @click="showFilter = !showFilter" class="inline-block ml-1 cursor-pointer hover:bg-gray-100 rounded-full p-1 -mb-1.5">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                class="w-3 h-3"
+                            >
+                                <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+
+                        <!-- Status Filter Dropdown -->
+                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <button @click="$wire.set('selectedStatuses', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
+                                <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach($statuses as $status)
+                                    <label class="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            wire:model.live="selectedStatuses"
+                                            value="{{ $status->id }}"
+                                            x-ref="status_{{ $status->id }}"
+                                            class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                        >
+                                        <span class="text-sm">{{ $status->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Selected Status Filters -->
+                        <div>
+                            @foreach($selectedStatuses as $statusId)
+                                @php
+                                    $status = $statuses->firstWhere('id', $statusId);
+                                @endphp
+                                <span class="inline-block mt-1 bg-gray-500 font-normal rounded-full px-2 py-0.5 text-xs text-white whitespace-nowrap">
+                    <span class="inline-block max-w-20 overflow-hidden  align-middle">{{ $status->name }}</span>
+                    <span
+                        class="inline-block ml-2 cursor-pointer hover:text-blue-600  align-middle"
+                        @click="$refs['status_{{ $statusId }}'].click()">X</span>
+                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
             @if($columns['milestone'])
                 <div class="col-span-1 text-left cursor-pointer {{ $lastColumn === 'milestone' ? 'text-right pr-4' : '' }}" wire:click="sortBy('m.name')">
                     Milestone
@@ -116,128 +355,135 @@
                 </div>
             @endif
         </div>
-    </div>
 
-    <div class="sticky top-20 z-10 p-2 px-4 bg-white shadow-md border-b">
-        <div class="flex space-x-8 items-start">
-            <!-- Status Filter -->
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Status</h3>
-                    <button
-                        @click="$wire.set('selectedStatuses', [])"
-                        class="text-blue-500 text-xs hover:underline"
+        <div class="flex flex-col hidden">
+
+            <div x-show="toggleAllFilters" class=" p-2 px-4 bg-white shadow-md border-b">
+            <div class="flex space-x-8 items-start">
+                <!-- Status Filter -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Status</h3>
+                        <button
+                            @click="$wire.set('selectedStatuses', [])"
+                            class="text-blue-500 text-xs hover:underline"
+                        >
+                            [Clear]
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        @foreach($statuses as $status)
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="selectedStatuses"
+                                    value="{{ $status->id }}"
+                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                >
+                                <span class="text-sm">{{ $status->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Priority Filter -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Priority</h3>
+                        <button
+                            @click="$wire.set('selectedPriorities', [])"
+                            class="text-blue-500 text-xs hover:underline"
+                        >
+                            [Clear]
+                        </button>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($priorities as $priority)
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="selectedPriorities"
+                                    x-ref="priority_{{ $priority->id }}"
+                                    value="{{ $priority->id }}"
+                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                >
+                                <span class="text-sm">{{ $priority->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Assigned Users Filter -->
+                <div x-data="{ userSearch: '', filteredUsers: @js($users) }">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold text-gray-700">Assigned Users</h3>
+                        <button
+                            @click="userSearch = ''; $wire.set('selectedUsers', [])"
+                            class="text-blue-500 text-xs hover:underline"
+                        >
+                            [Clear]
+                        </button>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        x-model="userSearch"
+                        class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
                     >
-                        [Clear]
-                    </button>
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        <template x-for="user in filteredUsers.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()))" :key="user.id">
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    :value="user.id"
+                                    wire:model.live="selectedUsers"
+                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                >
+                                <span class="text-sm" x-text="user.name"></span>
+                            </label>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="space-y-2">
-                    @foreach($statuses as $status)
-                        <label class="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                wire:model.live="selectedStatuses"
-                                value="{{ $status->id }}"
-                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                            >
-                            <span class="text-sm">{{ $status->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Priority Filter -->
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Priority</h3>
-                    <button
-                        @click="$wire.set('selectedPriorities', [])"
-                        class="text-blue-500 text-xs hover:underline"
+                <!-- Project Filter -->
+                <div x-data="{ projectSearch: '', filteredProjects: @js($projects) }">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold text-gray-700">Projects</h3>
+                        <button
+                            @click="projectSearch = ''; $wire.set('selectedProjects', [])"
+                            class="text-blue-500 text-xs hover:underline"
+                        >
+                            [Clear]
+                        </button>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search projects..."
+                        x-model="projectSearch"
+                        class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
                     >
-                        [Clear]
-                    </button>
-                </div>
-                <div class="space-y-2">
-                    @foreach($priorities as $priority)
-                        <label class="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                wire:model.live="selectedPriorities"
-                                value="{{ $priority->id }}"
-                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                            >
-                            <span class="text-sm">{{ $priority->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Assigned Users Filter -->
-            <div x-data="{ userSearch: '', filteredUsers: @js($users) }">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-700">Assigned Users</h3>
-                    <button
-                        @click="userSearch = ''; $wire.set('selectedUsers', [])"
-                        class="text-blue-500 text-xs hover:underline"
-                    >
-                        [Clear]
-                    </button>
-                </div>
-                <input
-                    type="text"
-                    placeholder="Search users..."
-                    x-model="userSearch"
-                    class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
-                >
-                <div class="space-y-2 max-h-48 overflow-y-auto">
-                    <template x-for="user in filteredUsers.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()))" :key="user.id">
-                        <label class="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                :value="user.id"
-                                wire:model.live="selectedUsers"
-                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                            >
-                            <span class="text-sm" x-text="user.name"></span>
-                        </label>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Project Filter -->
-            <div x-data="{ projectSearch: '', filteredProjects: @js($projects) }">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-700">Projects</h3>
-                    <button
-                        @click="projectSearch = ''; $wire.set('selectedProjects', [])"
-                        class="text-blue-500 text-xs hover:underline"
-                    >
-                        [Clear]
-                    </button>
-                </div>
-                <input
-                    type="text"
-                    placeholder="Search projects..."
-                    x-model="projectSearch"
-                    class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
-                >
-                <div class="space-y-2 max-h-48 overflow-y-auto">
-                    <template x-for="project in filteredProjects.filter(p => p.name.toLowerCase().includes(projectSearch.toLowerCase()))" :key="project.id">
-                        <label class="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                :value="project.id"
-                                wire:model.live="selectedProjects"
-                                class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                            >
-                            <span class="text-sm" x-text="project.name"></span>
-                        </label>
-                    </template>
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        <template x-for="project in filteredProjects.filter(p => p.name.toLowerCase().includes(projectSearch.toLowerCase()))" :key="project.id">
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    :value="project.id"
+                                    wire:model.live="selectedProjects"
+                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                >
+                                <span class="text-sm" x-text="project.name"></span>
+                            </label>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
+        </div>
+
     </div>
+
+
 
 
 
@@ -265,13 +511,36 @@
                      style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
                     @if($columns['priority'])
                         <div class="col-span-1 {{ $lastColumn === 'priority' ? 'text-right pr-4' : '' }}">
-                            <span class="px-2 py-1 text-white rounded-md"
-                                  style="background-color: {{ $task->priority_color ?? '#ccc' }}">
-                                {{ $task->priority->name ?? 'N/A' }}
-                            </span>
+                            <div x-data="{ open: false }" class="relative">
+                                <button
+                                    class="px-2 py-1 text-white rounded-md"
+                                    style="background-color: {{ $task->priority_color ?? '#ccc' }}"
+                                    @click="open = !open"
+                                >
+                                    {{ $task->priority->name ?? 'N/A' }}
+                                </button>
+
+                                <!-- Priority Dropdown -->
+                                <div
+                                    x-show="open"
+                                    @click.away="open = false"
+                                    class="absolute mt-1 bg-white border rounded shadow-lg w-32 z-10"
+                                >
+                                    @foreach($priorities as $priority)
+                                        <button
+                                            class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                            wire:click="updateTaskPriority({{ $task->id }}, {{ $priority->id }})"
+                                            @click="open = false"
+                                        >
+                                            {{ $priority->name }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     @endif
-                    @if($columns['created_time'])
+
+                @if($columns['created_time'])
                         <div class="col-span-1 {{ $lastColumn === 'created_time' ? 'text-right pr-4' : '' }}">
                             {{ $task->created_at->format('d M Y') }}
                         </div>
@@ -281,26 +550,171 @@
                             {{ $task->creator->name ?? 'N/A' }}
                         </div>
                     @endif
-                    @if($columns['assigned_users'])
-                        <div class="col-span-1">
-                            {{ $task->assignees->pluck('name')->join(', ') }}
-                        </div>
-                    @endif
+                        @if($columns['assigned_users'])
+                            <div class="col-span-1">
+                                <div x-data="{ open: false, searchQuery: '' }" class="relative">
+                                    <!-- Display Avatars -->
+                                    <div class="flex -space-x-2">
+                                        @foreach ($task->assignees as $assignee)
+                                            <img
+                                                title="{{ $assignee->name }}"
+                                                src="{{ $assignee->profile_photo_url }}"
+                                                class="object-cover w-6 h-6 rounded-full border-2 border-white"
+                                            />
+                                        @endforeach
+                                        <button
+                                            class="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-500 rounded-full border-2 border-white"
+                                            @click="open = !open"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+
+                                    <!-- Dropdown -->
+                                    <div
+                                        x-show="open"
+                                        @click.away="open = false"
+                                        class="absolute mt-2 bg-white border shadow-lg rounded-md w-48 max-h-40 overflow-y-auto z-10"
+                                    >
+                                        <!-- Search Box -->
+                                        <div class="p-2">
+                                            <input
+                                                type="text"
+                                                x-model="searchQuery"
+                                                placeholder="Search users..."
+                                                class="w-full px-2 py-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <!-- User List -->
+                                        @foreach ($users as $user)
+                                            <div
+                                                x-show="searchQuery === '' || '{{ strtolower($user->name) }}'.includes(searchQuery.toLowerCase())"
+                                                class="flex items-center px-4 py-2 hover:bg-gray-100"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    wire:click="{{ $task->assignees->contains($user->id) ? 'unassignUserFromTask' : 'assignUserToTask' }}({{ $task->id }}, {{ $user->id }})"
+                                                    {{ $task->assignees->contains($user->id) ? 'checked' : '' }}
+                                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                                />
+                                                <img
+                                                    src="{{ $user->profile_photo_url }}"
+                                                    alt="{{ $user->name }}"
+                                                    class="w-6 h-6 rounded-full ml-2"
+                                                />
+                                                <span class="ml-2 text-sm">{{ $user->name }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+
+
                     @if($columns['status'])
-                        <div class="col-span-1 {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
-                            {{ $task->status->name ?? 'N/A' }}
-                        </div>
-                    @endif
-                    @if($columns['milestone'])
-                        <div class="col-span-1 {{ $lastColumn === 'milestone' ? 'text-right pr-4' : '' }}">
-                            {{ $task->milestone->name ?? 'N/A' }}
-                        </div>
-                    @endif
-                    @if($columns['due_date'])
-                        <div class="col-span-1 {{ $lastColumn === 'due_date' ? 'text-right pr-4' : '' }}">
-                            {{ $task->due_date ? $task->due_date->format('d M Y') : 'N/A' }}
-                        </div>
-                    @endif
+                            <div class="col-span-1 {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
+                                <div x-data="{ open: false }" class="relative">
+                                    <button
+                                        class="px-2 py-1 rounded-md bg-gray-200 text-gray-700"
+                                        @click="open = !open"
+                                    >
+                                        {{ $task->status->name ?? 'N/A' }}
+                                    </button>
+
+                                    <!-- Status Dropdown -->
+                                    <div
+                                        x-show="open"
+                                        @click.away="open = false"
+                                        class="absolute mt-1 bg-white border rounded shadow-lg w-32 z-10"
+                                    >
+                                        @foreach($statuses as $status)
+                                            <button
+                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                wire:click="updateTaskStatus({{ $task->id }}, {{ $status->id }})"
+                                                @click="open = false"
+                                            >
+                                                {{ $status->name }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($columns['milestone'])
+                            <div class="col-span-1 {{ $lastColumn === 'milestone' ? 'text-right pr-4' : '' }}">
+                                <div x-data="{ open: false }" class="relative">
+                                    <!-- Current Milestone -->
+                                    <button
+                                        class="hover:underline hover:text-blue-600"
+                                        @click="open = !open"
+                                    >
+                                        {{ $task->milestone->name ?? 'N/A' }}
+                                    </button>
+
+                                    <!-- Dropdown -->
+                                    <div
+                                        x-show="open"
+                                        @click.away="open = false"
+                                        class="absolute mt-1 bg-white border shadow-lg rounded-md w-48 max-h-40 overflow-y-auto z-10"
+                                    >
+                                        @foreach ($task->project->milestones ?? [] as $milestone)
+                                            <button
+                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                wire:click="updateTaskMilestone({{ $task->id }}, {{ $milestone->id }})"
+                                                @click="open = false"
+                                            >
+                                                {{ $milestone->name }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($columns['due_date'])
+                            <div class="col-span-1 {{ $lastColumn === 'due_date' ? 'text-right pr-4' : '' }}">
+                                <div x-data="{ open: false, date: '{{ $task->due_date ? $task->due_date->format('Y-m-d') : '' }}' }" class="relative">
+                                    <!-- Display Current Due Date -->
+                                    <button
+                                        class="text-gray-700 hover:underline hover:text-blue-600"
+                                        @click="open = !open"
+                                    >
+                                        {{ $task->due_date ? $task->due_date->format('d M Y') : 'N/A' }}
+                                    </button>
+
+                                    <!-- Date Picker -->
+                                    <div
+                                        x-show="open"
+                                        @click.away="open = false"
+                                        class="absolute mt-1 bg-white border shadow-lg rounded-md p-2 z-10"
+                                    >
+                                        <input
+                                            type="date"
+                                            x-model="date"
+                                            class="w-full p-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
+                                        />
+                                        <div class="flex justify-end mt-2 space-x-2">
+                                            <button
+                                                class="px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-md"
+                                                @click="open = false"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                class="px-2 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                                                @click="$wire.updateTaskDueDate({{ $task->id }}, date); open = false"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                 </div>
             </div>
         @empty
@@ -310,3 +724,41 @@
         @endforelse
     </div>
 </div>
+
+@script
+<script>
+    window.addEventListener('popstate', () => {
+        const params = new URLSearchParams(window.location.search);
+
+        // Handle parameters with "[]" in their keys
+        const parseArrayParams = (keyPrefix) => {
+            const results = [];
+            for (const [key, value] of params.entries()) {
+                if (key.startsWith(keyPrefix)) {
+                    results.push(value);
+                }
+            }
+            return results;
+        };
+
+        const filters = {
+            selectedUsers: parseArrayParams('selectedUsers'),
+            selectedProjects: parseArrayParams('selectedProjects'),
+            selectedStatuses: JSON.parse(params.get('selectedStatuses') || '[]'),
+            selectedPriorities: JSON.parse(params.get('selectedPriorities') || '[]'),
+            sortColumn: params.get('sortColumn') || 'name',
+            sortDirection: params.get('sortDirection') || 'asc',
+        };
+
+        console.log(filters);
+
+        // Dispatch to Livewire
+        Livewire.dispatch('filterUpdated', JSON.parse(JSON.stringify(filters)));
+
+    });
+
+
+</script>
+@endscript
+
+

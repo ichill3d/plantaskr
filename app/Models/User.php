@@ -96,4 +96,28 @@ class User extends Authenticatable
         ->withTimestamps();   // Include timestamps
     }
 
+    public function getAvatarAttribute()
+    {
+        if (!empty($this->profile_photo_path)) {
+            logger('Using profile photo:', [$this->profile_photo_path]);
+            return '<img src="' . e(asset('storage/' . $this->profile_photo_path)) . '" alt="Avatar" class="rounded-full w-10 h-10 object-cover">';
+        }
+
+        $names = explode(' ', $this->name);
+        $initials = strtoupper(substr($names[0] ?? '', 0, 1) . substr(end($names) ?? '', 0, 1));
+
+        logger('Using initials:', [$initials]);
+
+        return '<div class="rounded-full bg-blue-500 text-white flex items-center justify-center w-10 h-10 text-sm font-bold">' . $initials . '</div>';
+    }
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo_path) {
+            return asset('storage/' . $this->profile_photo_path);
+        }
+
+        // Fallback to a placeholder image
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0D8ABC&color=fff';
+    }
+
 }

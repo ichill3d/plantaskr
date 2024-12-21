@@ -34,6 +34,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [TeamController::class, 'tasks'])->name('organizations.tasks');
             Route::get('/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
         });
+        // Board Routes
+        Route::prefix('board')->group(function () {
+            Route::get('/main', [TeamController::class, 'board'])->name('organizations.board');
+        });
 
 
         // Projects Routes
@@ -41,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [TeamController::class, 'projects'])->name('organizations.projects'); // List all projects
 
             Route::get('{project_id}/{tab?}', [ProjectController::class, 'show'])
-                ->where('tab', 'overview|discussion|files|tasks|milestones|members|settings') // Limit valid tabs
+                ->where('tab', 'overview|discussion|files|tasks|milestones|members|settings|board') // Limit valid tabs
                 ->name('organizations.projects.show');
 
             Route::resource('milestones', MilestoneController::class)->except(['show']);

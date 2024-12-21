@@ -45,7 +45,7 @@ class Task extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'task_users', 'tasks_id', 'users_id')
-            ->withPivot('role_id') // Include the role_id in the pivot
+            ->withPivot('role_id')
             ->withTimestamps();
     }
     public function creator()

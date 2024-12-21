@@ -125,7 +125,7 @@ class ProjectController extends Controller
         // Retrieve the project
         $project = Project::where('id', $projectId)->where('team_id', $team->id)->firstOrFail();
 
-        $allowedTabs = ['overview', 'discussion', 'tasks', 'milestones', 'members', 'settings', 'files'];
+        $allowedTabs = ['overview', 'discussion', 'tasks', 'milestones', 'members', 'settings', 'files', 'board'];
         if (!in_array($tab, $allowedTabs)) {
             abort(404); // Invalid tab, return a 404 response
         }

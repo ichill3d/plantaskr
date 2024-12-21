@@ -22,6 +22,14 @@
     </li>
     <li>
         <x-side-menu-item
+            label="Board"
+            link="{{ route('organizations.board', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
+            :active="request()->routeIs('organizations.board*')"
+        />
+    </li>
+
+    <li>
+        <x-side-menu-item
             label="Members"
             link="{{ route('organizations.members', ['id' => $team->id, 'organization_alias' => $team->alias]) }}"
             :active="request()->routeIs('organizations.members')"
