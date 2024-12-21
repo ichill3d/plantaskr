@@ -48,14 +48,19 @@ jobs:
           echo "DB_HOST=YOUR_CLOUD_SQL_CONNECTION_NAME" >> .env
           echo "DB_CONNECTION=mysql" >> .env
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
       - name: Deploy to App Engine
         run: gcloud app deploy --version=v1 --promote --set-env-vars DB_CONNECTION=mysql,DB_HOST=plantaskr-445021:europe-central2:plantaskr,DB_PORT=3306,DB_DATABASE=plantaskr,DB_USERNAME=plantaskr_user,DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
 
       - name: Wait for App Engine instance to start
         run: |
