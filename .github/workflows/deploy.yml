@@ -24,14 +24,24 @@ jobs:
         with:
           node-version: '18' # Or your preferred Node.js version
 
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Publish Livewire Assets
+        run: php artisan vendor:publish --tag=livewire:assets --force
+
+      - name: Clear Cache
+        run: |
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan view:clear
+          php artisan route:clear
+
       - name: Install npm dependencies
         run: npm ci # or npm install
 
       - name: Run Mix (or other build process)
         run: npm run build # Or npm run production if you use that
-
-      - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction
 
       - name: Copy .env.example to .env
         run: cp .env.example .env
