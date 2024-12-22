@@ -42,7 +42,12 @@ return [
             'serve' => true,
             'throw' => false,
         ],
-
+        'livewire-tmp' => [
+            'driver' => 'local',
+            'root' => '/mnt/volume_fra1_01/storage/livewire-tmp',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
         'public' => [
             'driver' => 'local',
             'root' => '/mnt/volume_fra1_01/storage/app/public',
