@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Attachment;
@@ -64,58 +65,59 @@ class FileUpload extends Component
     }
     public function uploadFiles()
     {
+        // Limit file uploads
         if (count($this->files) > 10) {
-            $this->reset('files'); // Clear the files
+            $this->reset('files');
             session()->flash('error', 'You can only upload up to 10 files at once.');
             return;
         }
 
+        // Validate uploaded files
         $this->validate([
             'files.*' => 'required|file|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt|max:5120',
         ], [
-            'files.*.mimes' => 'Only specific file types are allowed (jpg, png, pdf, etc.)',
-            'files.*.max' => 'Each file must not exceed 2MB in size.',
+            'files.*.mimes' => 'Only specific file types are allowed (jpg, png, pdf, etc.).',
+            'files.*.max' => 'Each file must not exceed 5MB in size.',
         ]);
 
-        foreach ($this->files as $file) {
-            $path = $file->store('attachments', 'public');
-            $attachment = Attachment::create([
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'uploaded_by' => auth()->id(),
-            ]);
+        // Atomic Transaction for Safety
+        DB::transaction(function () {
+            foreach ($this->files as $file) {
+                $attachment = Attachment::uploadAttachment($file);
 
-            // Attach to task or project
-            if ($this->taskId) {
-                $attachment->tasks()->attach($this->taskId, ['is_reference' => false]);
-            } elseif ($this->projectId) {
-                $attachment->projects()->attach($this->projectId);
+                // Ensure attachment exists
+                if (!$attachment) {
+                    throw new \Exception('Failed to upload attachment: ' . $file->getClientOriginalName());
+                }
+
+                // Attach to Task or Project
+                if ($this->taskId) {
+                    $attachment->tasks()->attach($this->taskId, ['is_reference' => false]);
+                } elseif ($this->projectId) {
+                    $attachment->projects()->attach($this->projectId);
+                }
             }
+        });
 
-        }
-
+        // Refresh attachments and reset files
         $this->loadAttachments();
-        $this->reset('files'); // Reset file input
+        $this->reset('files');
+
+        session()->flash('success', 'Files uploaded successfully.');
     }
 
     public function deleteAttachment($attachmentId)
     {
-        // Find the attachment
-        $attachment = Attachment::findOrFail($attachmentId);
+        try {
+            Attachment::deleteAttachment($attachmentId);
 
-        // Delete the file from storage
-        \Storage::disk('public')->delete($attachment->file_path);
+            // Refresh attachments if you're using Livewire or need to re-fetch
+            $this->loadAttachments();
 
-        // Detach relationships (tasks or projects) and delete the record
-        $attachment->tasks()->detach();
-        $attachment->projects()->detach();
-        $attachment->delete();
-
-        // Refresh the list of attachments
-        $this->loadAttachments();
-
-        // Optional: Flash a success message
-        session()->flash('success', 'File deleted successfully.');
+            session()->flash('success', 'Attachment deleted successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to delete attachment: ' . $e->getMessage());
+        }
     }
 
     public function handleFileDrop(Request $request)
