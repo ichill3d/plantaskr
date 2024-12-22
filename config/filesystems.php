@@ -38,13 +38,14 @@ return [
         ],
         'production' => [
             'driver' => 'local',
-            'root' => '/mnt/volume_fra1_01/storage/app/public',
-            'serve' => true,
+            'root' => '/mnt/volume_fra1_01/storage/app',
+            'url' => env('APP_URL') . '/storage',
+            'visibility' => 'private',
             'throw' => false,
         ],
         'livewire-tmp' => [
             'driver' => 'local',
-            'root' => '/mnt/volume_fra1_01/storage',
+            'root' => '/mnt/volume_fra1_01/storage/app/livewire-tmp',
             'visibility' => 'private',
             'throw' => false,
         ],

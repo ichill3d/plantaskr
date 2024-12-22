@@ -30,19 +30,22 @@
 
                 @foreach ($attachments as $attachment)
                     <div class="relative group">
-                        <!-- Thumbnail -->
+                        <!-- Thumbnail for Images -->
                         @if (in_array(strtolower(pathinfo($attachment->file_name, PATHINFO_EXTENSION)), ['jpg', 'png', 'jpeg', 'gif']))
                             <a href="#"
-                               @click.prevent="showLightbox = true; lightboxImage = '{{ asset('storage/' . $attachment->file_path) }}'; lightboxTitle = '{{ $attachment->file_name }}'">
-                                <img src="{{ asset('storage/' . $attachment->file_path) }}"
+                               @click.prevent="showLightbox = true; lightboxImage = '{{ Storage::disk(config('filesystems.default'))->url($attachment->file_path) }}'; lightboxTitle = '{{ $attachment->file_name }}'">
+                                <img src="{{ Storage::disk(config('filesystems.default'))->url($attachment->file_path) }}"
                                      alt="{{ $attachment->file_name }}"
                                      class="w-full h-32 object-cover rounded-md">
                             </a>
                         @else
-                            <a href="{{ asset('storage/' . $attachment->file_path) }}"
+                            <!-- Link for Non-Image Files -->
+                            <a href="{{ Storage::disk(config('filesystems.default'))->url($attachment->file_path) }}"
                                target="_blank"
                                class="w-full h-32 bg-gray-200 flex items-center justify-center rounded-md text-gray-600">
-                                <div class="text-sm font-semibold">{{ strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)) }}</div>
+                                <div class="text-sm font-semibold">
+                                    {{ strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)) }}
+                                </div>
                             </a>
                         @endif
 
