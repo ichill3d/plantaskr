@@ -64,7 +64,9 @@
 
                         <!-- Task Card -->
                         <div
-                            class="bg-white rounded-xl border-2 border-t-[5px] border-gray-300 shadow cursor-move text-sm xl:text-base transition-transform duration-300 ease-in-out"
+                            class="bg-white rounded-xl border-2 border-t-0 border-gray-300
+                            shadow cursor-move text-sm xl:text-base transition-transform duration-300 ease-in-out
+                            "
                             style="border-top-color: {{ $task['project']['color'] }};"
                             draggable="true"
                             @dragstart="
@@ -76,10 +78,15 @@
                             }"
                             x-data="{ showModal: false, taskLoaded: false }"
                         >
+                            <div class="overflow-y-hidden border-t-2 border-t-gray-400 h-6 text-xs text-center rounded-t-xl p-1 opacity-50"
+                                 style="background-color: {{$task['project']['color']}}; color: {{ get_contrast_color($task['project']['color']) }} ">
+                                <span class="opacity-80">{{ $task['project']['name'] }}</span>
+                            </div>
                             <!-- Task Name -->
                             <div class="rounded-xl p-2 border-b bg-gray-50 font-semibold mb-2">
                                 {{ $task['name'] }}
                             </div>
+                            <div class="p-2">
 
                             <!-- Assignees -->
                             <div class="border-b border-gray-300 pb-2 mb-2 flex items-center justify-between">
@@ -122,28 +129,28 @@
                                     Open Task
                                 </a>
                             </div>
-
-                            <!-- Task Modal (Lazy-Loaded Livewire Component) -->
-                            <div
-                                x-show="showModal"
-                                x-transition
-                                class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50"
-                            >
-                                <div class="bg-white rounded-lg shadow-lg p-6 w-1/2 relative">
-                                    <button
-                                        @click="showModal = false"
-                                        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        &times;
-                                    </button>
-
-                                    <!-- Lazy-Loaded Livewire Component -->
-                                    <div x-show="taskLoaded">
-                                        <livewire:show-task :taskId="$task['id']" />
-
-                                    </div>
-                                </div>
                             </div>
+{{--                            <!-- Task Modal (Lazy-Loaded Livewire Component) -->--}}
+{{--                            <div--}}
+{{--                                x-show="showModal"--}}
+{{--                                x-transition--}}
+{{--                                class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50"--}}
+{{--                            >--}}
+{{--                                <div class="bg-white rounded-lg shadow-lg p-6 w-1/2 relative">--}}
+{{--                                    <button--}}
+{{--                                        @click="showModal = false"--}}
+{{--                                        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"--}}
+{{--                                    >--}}
+{{--                                        &times;--}}
+{{--                                    </button>--}}
+
+{{--                                    <!-- Lazy-Loaded Livewire Component -->--}}
+{{--                                    <div x-show="taskLoaded">--}}
+{{--                                        <livewire:show-task :taskId="$task['id']" />--}}
+
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
                         </div>
                     @endforeach
 
