@@ -44,7 +44,7 @@ return [
         ],
         'livewire-tmp' => [
             'driver' => 'local',
-            'root' => '/mnt/volume_fra1_01/storage/livewire-tmp',
+            'root' => '/mnt/volume_fra1_01/storage',
             'visibility' => 'private',
             'throw' => false,
         ],
