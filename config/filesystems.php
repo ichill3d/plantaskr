@@ -38,17 +38,15 @@ return [
         ],
         'production' => [
             'driver' => 'local',
-            'root' => '/mnt/volume_fra1_01/storage/app',
-            'url' => env('APP_URL') . '/storage',
-            'visibility' => 'private',
+            'root' => '/mnt/volume_fra1_01/storage/app/public',
+            'serve' => true,
             'throw' => false,
         ],
 
         'public' => [
             'driver' => 'local',
-            'root' => '/mnt/volume_fra1_01/storage/app',
-            'url' => env('APP_URL') . '/storage',
-            'visibility' => 'private',
+            'root' => '/mnt/volume_fra1_01/storage/app/public',
+            'serve' => true,
             'throw' => false,
         ],
 
