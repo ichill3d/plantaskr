@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\Team;
 
 class TeamController extends Controller
@@ -65,9 +66,10 @@ class TeamController extends Controller
         $members = $team->members;
         return view('teams.members', compact('team', 'members'));
     }
-     public function tasks($id, $organization_alias)
+     public function tasks($id, $organization_alias, $task_id = null)
     {
         $team = Team::find( $id);
+        $selectedTask = $task_id ? Task::find($task_id) : null;
 
         // Redirect to the correct URL if the alias doesn't match
         if ($team->alias !== $organization_alias) {
@@ -78,12 +80,12 @@ class TeamController extends Controller
         }
 
         $tasks = $team->tasks;
-        return view('teams.tasks', compact('team', 'tasks'));
+        return view('teams.tasks', compact('team', 'tasks', 'selectedTask'));
     }
-public function board($id, $organization_alias)
+public function board($id, $organization_alias, $task_id = null)
     {
         $team = Team::find( $id);
-
+        $selectedTask = $task_id ? Task::find($task_id) : null;
         // Redirect to the correct URL if the alias doesn't match
         if ($team->alias !== $organization_alias) {
             return redirect()->route('organizations.members', [
@@ -91,7 +93,7 @@ public function board($id, $organization_alias)
                 'organization_alias' => $team->alias,
             ], 301);
         }
-        return view('teams.board', compact('team'));
+        return view('teams.board', compact('team', 'selectedTask'));
     }
 
     public function membersManagement($id, $organization_alias)

@@ -10,6 +10,8 @@ class KanbanBoard extends Component
 
     public $tasks = []; // Holds all tasks grouped by status
 
+    public $selectedTask;
+
     protected $listeners = ['updateTaskStatus'];
 
 
@@ -23,7 +25,7 @@ class KanbanBoard extends Component
     public function loadTasks()
     {
         $query = Task::query()
-            ->with(['priority', 'status', 'project', 'assignees'])
+            ->with(['priority', 'status', 'project', 'assignees', 'team'])
             ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
             ->orderBy('task_status_id') // Ensure tasks are ordered by status first
             ->orderBy('board_position') // Then order tasks by board position

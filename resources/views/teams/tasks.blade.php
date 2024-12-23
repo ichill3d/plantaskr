@@ -5,7 +5,7 @@
     <x-dashboard-header title="Tasks">
         <livewire:create-task :currentTeamId="$team->id" :project_id="$project->id ?? null" />
     </x-dashboard-header>
-    <livewire:task-list :team-id="$team->id" />
+    <livewire:task-list :team-id="$team->id" :selectedTask="$selectedTask" />
 @endsection
 
 {{--@section('content')--}}

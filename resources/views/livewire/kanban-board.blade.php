@@ -1,4 +1,4 @@
-<div class="relative h-full overflow-y-auto max-h-[calc(100vh-10rem)]">
+<div class="relative h-full overflow-y-hidden max-h-[calc(100vh-10rem)]">
     <!-- Status Header -->
     <div class="grid sticky top-0 z-30 grid-cols-4 gap-4 overflow-x-auto">
         @foreach ($statuses as $statusId => $statusName)
@@ -10,7 +10,7 @@
 
     <!-- Task Board -->
     <div
-        class="grid grid-cols-4 gap-4 overflow-x-auto"
+        class="grid grid-cols-4 gap-4 overflow-x-auto h-full"
         x-data="{
             draggingTask: null,
             draggingStatus: null,
@@ -20,7 +20,7 @@
     >
         @foreach ($statuses as $statusId => $statusName)
             <div
-                class="bg-gray-100 rounded-lg shadow-md min-h-[200px] relative flex flex-col"
+                class="bg-gray-100 rounded-lg shadow-md h-full overflow-y-auto relative flex flex-col  scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
                 @dragover.prevent="
                     placeholderStatus = {{ $statusId }};
                     const items = Array.from($event.currentTarget.querySelectorAll('[draggable=true]'));
@@ -53,7 +53,7 @@
                 "
             >
                 <!-- Task List -->
-                <div class="space-y-1 p-2 flex-1 overflow-y-auto relative">
+                <div class="h-full space-y-1 p-2 flex-1 relative">
                     @foreach ($tasks[$statusId] ?? [] as $index => $task)
                         <!-- Placeholder Above -->
                         <div
@@ -115,42 +115,29 @@
 
                             <!-- Open Task Button -->
                             <div class="flex items-center justify-center">
+                                {{ $task['team']['alias']}}
+                                {{ $task['team']['id']}}
+                                {{ $task['id']}}
                                 <a
-                                    href="#"
+                                    href="{{ route('organizations.board.tasks.show', [
+                                                'id' => $task['team']['id'],
+                                                'organization_alias' => $task['team']['alias'],
+                                                'task_id' => $task['id']]) }}"
                                     @click.prevent="
-                                        showModal = true;
-                                        if (!taskLoaded) {
-                                            Livewire.dispatch('loadTask', { taskId: {{ $task['id'] }} });
-                                            taskLoaded = true;
-                                        }
-                                    "
-                                    class="bg-gray-200 px-1 text-gray-400 rounded-lg hover:text-blue-600"
+            history.pushState({}, '', '{{ route('organizations.board.tasks.show', ['id' => $task['team']['id'], 'organization_alias' => $task['team']['alias'], 'task_id' => $task['id']]) }}');
+            console.log('Kanban Task Clicked: {{ $task['id'] }}');
+            Livewire.dispatchTo('task-modal', 'openTaskModal', { taskId: {{ $task['id'] }} });
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('modal-opened'));
+            }, 100);
+        "
+                                    class="bg-gray-200 px-2 py-1 text-gray-600 rounded-md hover:bg-blue-600 hover:text-white text-sm"
                                 >
                                     Open Task
                                 </a>
                             </div>
                             </div>
-{{--                            <!-- Task Modal (Lazy-Loaded Livewire Component) -->--}}
-{{--                            <div--}}
-{{--                                x-show="showModal"--}}
-{{--                                x-transition--}}
-{{--                                class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50"--}}
-{{--                            >--}}
-{{--                                <div class="bg-white rounded-lg shadow-lg p-6 w-1/2 relative">--}}
-{{--                                    <button--}}
-{{--                                        @click="showModal = false"--}}
-{{--                                        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"--}}
-{{--                                    >--}}
-{{--                                        &times;--}}
-{{--                                    </button>--}}
 
-{{--                                    <!-- Lazy-Loaded Livewire Component -->--}}
-{{--                                    <div x-show="taskLoaded">--}}
-{{--                                        <livewire:show-task :taskId="$task['id']" />--}}
-
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
                         </div>
                     @endforeach
 
@@ -164,4 +151,28 @@
             </div>
         @endforeach
     </div>
+    <livewire:task-modal :taskId="$selectedTask?->id" />
+    @script
+    <script>
+        window.addEventListener('popstate', () => {
+        // Handle Task Modal Based on URL
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        console.log(pathSegments);
+        const taskId = pathSegments[pathSegments.length - 1];
+
+        if (!isNaN(taskId) && taskId !== '') {
+            Livewire.dispatch( 'openTaskModal', { taskId: parseInt(taskId) });
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('modal-opened'));
+            }, 100);
+        } else {
+            console.log("No Task ID detected, closing modal.");
+            Livewire.dispatch('closeTaskModal');
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('modal-closed'));
+            }, 100);
+        }
+    });
+    </script>
+    @endscript
 </div>

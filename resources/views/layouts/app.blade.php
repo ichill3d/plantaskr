@@ -17,7 +17,8 @@
 </head>
 <body class="font-sans antialiased bg-gray-200">
 <x-user-message />
-<div class="grid grid-cols-[15rem_minmax(0,1fr)] h-[calc(100vh-0.5rem)] overflow-hidden px-2 pt-2 space-x-2 max-w-9xl mx-auto sm:px-6 lg:px-8">
+{{--<div class="grid grid-cols-[15rem_minmax(0,1fr)] h-[calc(100vh-0.5rem)] overflow-hidden px-2 pt-2 space-x-2 max-w-9xl mx-auto sm:px-6 lg:px-8">--}}
+<div class="grid grid-cols-[15rem_minmax(0,1fr)] h-[calc(100vh-0.5rem)] overflow-hidden px-2 pt-2 space-x-2 sm:px-6 lg:px-8">
     <!-- Left column (fixed) -->
     <div class="w-60 h-full flex flex-col overflow-hidden">
         <!-- Sidebar Content -->

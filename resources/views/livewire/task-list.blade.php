@@ -495,16 +495,27 @@
             <div class="border rounded-md bg-white shadow-md hover:bg-gray-50 hover:text-blue-600 text-gray-800 ">
                 <!-- Task Name and Project -->
                 <a
-                    href="{{ route('organizations.tasks.show', ['id'=>$task->team->id, 'organization_alias'=>$task->team->alias, 'task_id'=>$task->id]) }}"
-                    class="flex justify-between items-start rounded-t-md  border-b  hover:bg-gray-100
-                    border-t-4" style="border-top-color: {{ $task->project->color }};">
-                    <div class="font-bold  px-4 py-2 ">{{ $task->name }}</div>
+                    href="{{ route('organizations.tasks.show', ['id' => $task->team->id, 'organization_alias' => $task->team->alias, 'task_id' => $task->id]) }}"
+                    x-data
+                    @click.prevent="
+        history.pushState({}, '', '{{ route('organizations.tasks.show', ['id' => $task->team->id, 'organization_alias' => $task->team->alias, 'task_id' => $task->id]) }}');
+        console.log('Task clicked : {{ $task->id }}');
+        Livewire.dispatch('openTaskModal', { taskId: {{ $task->id }} });
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('modal-opened'));
+        }, 100);
+    "
+                    class="flex justify-between items-start rounded-t-md border-b hover:bg-gray-100 border-t-4"
+                    style="border-top-color: {{ $task->project->color }};">
+
+                    <div class="font-bold px-4 py-2">{{ $task->name }}</div>
                     <div class="rounded-bl-full px-4 pb-1 pl-6"
                          style="background-color: {{ $task->project->color }}; color: {{ get_contrast_color($task->project->color) }}">
                         {{ $task->project->name }}
                     </div>
-
                 </a>
+
+
 
                 <!-- Task Details -->
                 <div class="grid gap-4 text-sm text-gray-600 px-4 py-2"
@@ -719,10 +730,14 @@
             </div>
         @empty
             <div class="text-center text-gray-500">
-                No tasks found for this team.
+                No tasks found.
             </div>
         @endforelse
     </div>
+    <!-- Task Modal Livewire Component -->
+
+    <livewire:task-modal :taskId="$selectedTask?->id" />
+
 </div>
 
 @script
@@ -730,7 +745,7 @@
     window.addEventListener('popstate', () => {
         const params = new URLSearchParams(window.location.search);
 
-        // Handle parameters with "[]" in their keys
+        // Parse Array Parameters (Helper Function)
         const parseArrayParams = (keyPrefix) => {
             const results = [];
             for (const [key, value] of params.entries()) {
@@ -741,6 +756,7 @@
             return results;
         };
 
+        // Parse Filters
         const filters = {
             selectedUsers: parseArrayParams('selectedUsers'),
             selectedProjects: parseArrayParams('selectedProjects'),
@@ -750,12 +766,27 @@
             sortDirection: params.get('sortDirection') || 'asc',
         };
 
-        console.log(filters);
-
-        // Dispatch to Livewire
+        // Dispatch Filter Update to Livewire Task List Component
         Livewire.dispatch('filterUpdated', JSON.parse(JSON.stringify(filters)));
 
+        // Handle Task Modal Based on URL
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        const taskId = pathSegments[pathSegments.length - 1];
+
+        if (!isNaN(taskId) && taskId !== '') {
+            Livewire.dispatch( 'openTaskModal', { taskId: parseInt(taskId) });
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('modal-opened'));
+            }, 100);
+        } else {
+            console.log("No Task ID detected, closing modal.");
+            Livewire.dispatch('closeTaskModal');
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('modal-closed'));
+            }, 100);
+        }
     });
+
 
 
 </script>

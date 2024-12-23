@@ -25,6 +25,8 @@ class TaskList extends Component
     public $selectedUsers = [];
     public $selectedProjects = [];
 
+    public $selectedTask;
+
     protected $listeners = [
         'taskPriorityUpdated' => '$refresh',
         'filterUpdated' => '$refresh',
