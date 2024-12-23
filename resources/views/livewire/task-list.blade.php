@@ -522,36 +522,11 @@
                      style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
                     @if($columns['priority'])
                         <div class="col-span-1 {{ $lastColumn === 'priority' ? 'text-right pr-4' : '' }}">
-                            <div x-data="{ open: false }" class="relative">
-                                <button
-                                    class="px-2 py-1 text-white rounded-md"
-                                    style="background-color: {{ $task->priority_color ?? '#ccc' }}"
-                                    @click="open = !open"
-                                >
-                                    {{ $task->priority->name ?? 'N/A' }}
-                                </button>
-
-                                <!-- Priority Dropdown -->
-                                <div
-                                    x-show="open"
-                                    @click.away="open = false"
-                                    class="absolute mt-1 bg-white border rounded shadow-lg w-32 z-10"
-                                >
-                                    @foreach($priorities as $priority)
-                                        <button
-                                            class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                            wire:click="updateTaskPriority({{ $task->id }}, {{ $priority->id }})"
-                                            @click="open = false"
-                                        >
-                                            {{ $priority->name }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                            </div>
+                            <livewire:task-priority-editable :task="$task" />
                         </div>
                     @endif
 
-                @if($columns['created_time'])
+                    @if($columns['created_time'])
                         <div class="col-span-1 {{ $lastColumn === 'created_time' ? 'text-right pr-4' : '' }}">
                             {{ $task->created_at->format('d M Y') }}
                         </div>
@@ -563,62 +538,7 @@
                     @endif
                         @if($columns['assigned_users'])
                             <div class="col-span-1">
-                                <div x-data="{ open: false, searchQuery: '' }" class="relative">
-                                    <!-- Display Avatars -->
-                                    <div class="flex -space-x-2">
-                                        @foreach ($task->assignees as $assignee)
-                                            <img
-                                                title="{{ $assignee->name }}"
-                                                src="{{ $assignee->profile_photo_url }}"
-                                                class="object-cover w-6 h-6 rounded-full border-2 border-white"
-                                            />
-                                        @endforeach
-                                        <button
-                                            class="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-500 rounded-full border-2 border-white"
-                                            @click="open = !open"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
-                                    <!-- Dropdown -->
-                                    <div
-                                        x-show="open"
-                                        @click.away="open = false"
-                                        class="absolute mt-2 bg-white border shadow-lg rounded-md w-48 max-h-40 overflow-y-auto z-10"
-                                    >
-                                        <!-- Search Box -->
-                                        <div class="p-2">
-                                            <input
-                                                type="text"
-                                                x-model="searchQuery"
-                                                placeholder="Search users..."
-                                                class="w-full px-2 py-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
-                                            />
-                                        </div>
-
-                                        <!-- User List -->
-                                        @foreach ($users as $user)
-                                            <div
-                                                x-show="searchQuery === '' || '{{ strtolower($user->name) }}'.includes(searchQuery.toLowerCase())"
-                                                class="flex items-center px-4 py-2 hover:bg-gray-100"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    wire:click="{{ $task->assignees->contains($user->id) ? 'unassignUserFromTask' : 'assignUserToTask' }}({{ $task->id }}, {{ $user->id }})"
-                                                    {{ $task->assignees->contains($user->id) ? 'checked' : '' }}
-                                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                                                />
-                                                <img
-                                                    src="{{ $user->profile_photo_url }}"
-                                                    alt="{{ $user->name }}"
-                                                    class="w-6 h-6 rounded-full ml-2"
-                                                />
-                                                <span class="ml-2 text-sm">{{ $user->name }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
+                                <livewire:task-assignees-editable :task="$task" />
                             </div>
                         @endif
 
@@ -626,103 +546,20 @@
 
                     @if($columns['status'])
                             <div class="col-span-1 {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
-                                <div x-data="{ open: false }" class="relative">
-                                    <button
-                                        class="px-2 py-1 rounded-md bg-gray-200 text-gray-700"
-                                        @click="open = !open"
-                                    >
-                                        {{ $task->status->name ?? 'N/A' }}
-                                    </button>
-
-                                    <!-- Status Dropdown -->
-                                    <div
-                                        x-show="open"
-                                        @click.away="open = false"
-                                        class="absolute mt-1 bg-white border rounded shadow-lg w-32 z-10"
-                                    >
-                                        @foreach($statuses as $status)
-                                            <button
-                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                wire:click="updateTaskStatus({{ $task->id }}, {{ $status->id }})"
-                                                @click="open = false"
-                                            >
-                                                {{ $status->name }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
+                                <!-- Livewire Task Status Component -->
+                                <livewire:task-status-editable :task="$task" />
                             </div>
                         @endif
 
                         @if($columns['milestone'])
                             <div class="col-span-1 {{ $lastColumn === 'milestone' ? 'text-right pr-4' : '' }}">
-                                <div x-data="{ open: false }" class="relative">
-                                    <!-- Current Milestone -->
-                                    <button
-                                        class="hover:underline hover:text-blue-600"
-                                        @click="open = !open"
-                                    >
-                                        {{ $task->milestone->name ?? 'N/A' }}
-                                    </button>
-
-                                    <!-- Dropdown -->
-                                    <div
-                                        x-show="open"
-                                        @click.away="open = false"
-                                        class="absolute mt-1 bg-white border shadow-lg rounded-md w-48 max-h-40 overflow-y-auto z-10"
-                                    >
-                                        @foreach ($task->project->milestones ?? [] as $milestone)
-                                            <button
-                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                wire:click="updateTaskMilestone({{ $task->id }}, {{ $milestone->id }})"
-                                                @click="open = false"
-                                            >
-                                                {{ $milestone->name }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
+                                <livewire:task-milestone-editable :task="$task" />
                             </div>
                         @endif
 
                         @if($columns['due_date'])
                             <div class="col-span-1 {{ $lastColumn === 'due_date' ? 'text-right pr-4' : '' }}">
-                                <div x-data="{ open: false, date: '{{ $task->due_date ? $task->due_date->format('Y-m-d') : '' }}' }" class="relative">
-                                    <!-- Display Current Due Date -->
-                                    <button
-                                        class="text-gray-700 hover:underline hover:text-blue-600"
-                                        @click="open = !open"
-                                    >
-                                        {{ $task->due_date ? $task->due_date->format('d M Y') : 'N/A' }}
-                                    </button>
-
-                                    <!-- Date Picker -->
-                                    <div
-                                        x-show="open"
-                                        @click.away="open = false"
-                                        class="absolute mt-1 bg-white border shadow-lg rounded-md p-2 z-10"
-                                    >
-                                        <input
-                                            type="date"
-                                            x-model="date"
-                                            class="w-full p-1 border rounded-md text-sm focus:ring focus:ring-blue-500"
-                                        />
-                                        <div class="flex justify-end mt-2 space-x-2">
-                                            <button
-                                                class="px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-md"
-                                                @click="open = false"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                class="px-2 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                                                @click="$wire.updateTaskDueDate({{ $task->id }}, date); open = false"
-                                            >
-                                                Save
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <livewire:task-due-date-editable :task="$task" />
                             </div>
                         @endif
 

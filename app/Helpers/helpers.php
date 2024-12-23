@@ -38,3 +38,19 @@ if (!function_exists('get_contrast_color')) {
         return $luminance > 0.65 ? '#000000' : '#ffffff';
     }
 }
+
+if (!function_exists('toObject')) {
+    /**
+     * Convert an array to an object.
+     *
+     * @param mixed $data
+     * @return object
+     */
+    function toObject($data)
+    {
+        if (is_array($data)) {
+            return json_decode(json_encode($data));
+        }
+        return (object) $data;
+    }
+}

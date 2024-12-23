@@ -111,13 +111,16 @@
                                 >
                                     {{ $task['priority']['name'] ?? 'No Priority' }}
                                 </span>
+{{--                                @php--}}
+{{--                                    $taskModel = \App\Models\Task::find($task['id'] ?? null);--}}
+{{--                                @endphp--}}
+{{--                                <div>Priority:</div>--}}
+{{--                                <livewire:task-priority-editable :task="$taskModel" />--}}
+
                             </div>
 
                             <!-- Open Task Button -->
                             <div class="flex items-center justify-center">
-                                {{ $task['team']['alias']}}
-                                {{ $task['team']['id']}}
-                                {{ $task['id']}}
                                 <a
                                     href="{{ route('organizations.board.tasks.show', [
                                                 'id' => $task['team']['id'],
