@@ -8,28 +8,30 @@ use App\Models\TaskStatus;
 
 class TaskStatusEditable extends Component
 {
+    public $taskId;
     public Task $task;
     public $statuses;
     public $selectedStatus;
 
-    public function mount(Task $task)
+    public function mount($taskId)
     {
-        $this->task = $task;
+        $this->taskId = $taskId;
+        $this->task = Task::find($taskId);
         $this->statuses = TaskStatus::all();
-        $this->selectedStatus = $task->status->id ?? null;
+        $this->selectedStatus = $this->task->status->id ?? null;
     }
 
     public function updateStatus($statusId)
     {
         $status = TaskStatus::find($statusId);
-
+        $this->task = Task::find($this->taskId);
         if ($status) {
             $this->task->status()->associate($status);
             $this->task->save();
 
             $this->selectedStatus = $statusId;
             $this->dispatch('statusUpdated', $statusId);
-            session()->flash('success', 'Task status updated successfully!');
+//            session()->flash('success', 'Task status updated successfully!');
         }
     }
 

@@ -69,6 +69,13 @@ class Team extends JetstreamTeam
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function allMembers()
+    {
+        return $this->members()
+            ->when($this->creator, function ($query) {
+                $query->orWhere('users.id', $this->creator->id);
+            });
+    }
 
 
 

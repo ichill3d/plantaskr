@@ -13,10 +13,10 @@ class TaskAssigneesEditable extends Component
     public $users;
     public $searchQuery = '';
 
-    public function mount(Task $task)
+    public function mount($taskId)
     {
-        $this->task = $task;
-        $this->users = User::all();
+        $this->task = Task::find($taskId);
+        $this->users = $this->task->team->members->merge([$this->task->team->creator])->unique('id') ?? collect();
     }
 
     public function assignUser($userId)

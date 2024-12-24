@@ -14,6 +14,7 @@
         @click.away="open = false"
         x-transition.opacity.duration.300ms
         class="absolute mt-1 bg-white border rounded-md shadow-lg w-32 z-10"
+        style="display: none;"
     >
         @foreach ($priorities as $priority)
             <button
@@ -25,17 +26,4 @@
             </button>
         @endforeach
     </div>
-
-    <!-- Success Message -->
-    @if (session()->has('success'))
-        <div
-            x-data="{ visible: true }"
-            x-init="setTimeout(() => visible = false, 2000)"
-            x-show="visible"
-            x-transition.opacity.duration.500ms
-            class="mt-2 text-xs text-green-500"
-        >
-            {{ session('success') }}
-        </div>
-    @endif
 </div>

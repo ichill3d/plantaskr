@@ -11,10 +11,10 @@ class TaskDueDateEditable extends Component
     public Task $task;
     public $dueDate;
 
-    public function mount(Task $task)
+    public function mount($taskId)
     {
-        $this->task = $task;
-        $this->dueDate = $task->due_date ? $task->due_date->format('Y-m-d') : null;
+        $this->task = Task::find($taskId);
+        $this->dueDate = $this->task->due_date ? $this->task->due_date->format('Y-m-d') : null;
     }
 
     public function updateDueDate($date)

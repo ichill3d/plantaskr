@@ -19,9 +19,6 @@
                     >
                         Clear All Filters
                     </button>
-                    <button @click="toggleAllFilters = ! toggleAllFilters" class="hidden text-blue-500 hover:underline ml-2">
-                        Toggle Filters
-                    </button>
                     <!-- Dropdown -->
                     <div
                          x-show="open"
@@ -94,9 +91,9 @@
                         @endif
 
                         <!-- Project Filter Dropdown -->
-                        <div x-show="showFilter" class="absolute -ml-44 mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                        <div x-show="showFilter" class="absolute -ml-44 mt-2 bg-white border shadow-lg rounded-md w-64 p-4" style="display: none;">
                             <div class="flex justify-between items-center mb-2">
-                                <button @click="$wire.set('selectedProjects', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
+                                <button @click="$wire.set('selectedProjects', [])" class="text-white bg-gray-400 p-1 rounded-md text-xs hover:bg-gray-500">Clear All</button>
                                 <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
                             </div>
 
@@ -153,7 +150,7 @@
                     </span>
 
                     <!-- Priority Filter -->
-                    <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                    <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4" style="display: none;">
                         <div class="flex justify-between items-center mb-2">
 
                             <button
@@ -226,7 +223,7 @@
         </span>
 
                         <!-- Assigned Users Filter Dropdown -->
-                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4" style="display: none;">
                             <div class="flex justify-between items-center mb-2">
                                 <button @click="$wire.set('selectedUsers', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
                                 <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
@@ -284,7 +281,7 @@
 
             @if($columns['status'])
                     <div x-data="{ showFilter: false }" class="col-span-1 text-left {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
-                        <span class="cursor-pointer" wire:click="sortBy('task_status_id')">Status</span>
+                        <span class="cursor-pointer"  wire:click="sortBy('task_status_id')">Status</span>
                         @if($sortColumn === 'task_status_id')
                             <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                         @endif
@@ -300,7 +297,7 @@
                         </span>
 
                         <!-- Status Filter Dropdown -->
-                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4">
+                        <div x-show="showFilter" class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 p-4" style="display: none;">
                             <div class="flex justify-between items-center mb-2">
                                 <button @click="$wire.set('selectedStatuses', [])" class="text-blue-500 text-xs hover:underline">[Clear]</button>
                                 <button @click="showFilter = false" class="p-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">OK</button>
@@ -314,6 +311,7 @@
                                             value="{{ $status->id }}"
                                             x-ref="status_{{ $status->id }}"
                                             class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
+                                            x-on:click="Livewire.dispatch('refreshTaskList');"
                                         >
                                         <span class="text-sm">{{ $status->name }}</span>
                                     </label>
@@ -514,15 +512,12 @@
                         {{ $task->project->name }}
                     </div>
                 </a>
-
-
-
                 <!-- Task Details -->
                 <div class="grid gap-4 text-sm text-gray-600 px-4 py-2"
                      style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
                     @if($columns['priority'])
                         <div class="col-span-1 {{ $lastColumn === 'priority' ? 'text-right pr-4' : '' }}">
-                            <livewire:task-priority-editable :task="$task" />
+                            <livewire:task-priority-editable :taskId="$task->id" wire:key="task-{{ $task->id }}-{{ now()->timestamp }}" />
                         </div>
                     @endif
 
@@ -538,7 +533,7 @@
                     @endif
                         @if($columns['assigned_users'])
                             <div class="col-span-1">
-                                <livewire:task-assignees-editable :task="$task" />
+                                <livewire:task-assignees-editable :taskId="$task->id" wire:key="task-{{ $task->id }}-{{ now()->timestamp }}" />
                             </div>
                         @endif
 
@@ -547,19 +542,19 @@
                     @if($columns['status'])
                             <div class="col-span-1 {{ $lastColumn === 'status' ? 'text-right pr-4' : '' }}">
                                 <!-- Livewire Task Status Component -->
-                                <livewire:task-status-editable :task="$task" />
+                                <livewire:task-status-editable :taskId="$task->id" wire:key="task-{{ $task->id }}-{{ now()->timestamp }}" />
                             </div>
                         @endif
 
                         @if($columns['milestone'])
                             <div class="col-span-1 {{ $lastColumn === 'milestone' ? 'text-right pr-4' : '' }}">
-                                <livewire:task-milestone-editable :task="$task" />
+                                <livewire:task-milestone-editable :taskId="$task->id" wire:key="task-{{ $task->id }}-{{ now()->timestamp }}" />
                             </div>
                         @endif
 
                         @if($columns['due_date'])
                             <div class="col-span-1 {{ $lastColumn === 'due_date' ? 'text-right pr-4' : '' }}">
-                                <livewire:task-due-date-editable :task="$task" />
+                                <livewire:task-due-date-editable :taskId="$task->id" wire:key="task-{{ $task->id }}-{{ now()->timestamp }}" />
                             </div>
                         @endif
 

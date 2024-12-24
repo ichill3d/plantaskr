@@ -9,12 +9,13 @@ use App\Models\TaskPriority;
 class TaskPriorityEditable extends Component
 {
     public Task $task;
+
     public $priorities;
     public $selectedPriority;
 
-    public function mount(Task $task)
+    public function mount(int $taskId)
     {
-        $this->task = Task::find($task->id ?? null);
+        $this->task = Task::find($taskId ?? null);
         $this->priorities = TaskPriority::all(); // Using Priority model here
         $this->selectedPriority = $task->priority->id ?? null;
     }

@@ -13,6 +13,7 @@
         @click.away="open = false"
         x-transition.opacity.duration.300ms
         class="absolute right-0 mt-1 bg-white border shadow-lg rounded-md p-3 w-52 z-10"
+        style="display: none;"
     >
         <input
             type="date"

@@ -12,10 +12,10 @@ class TaskProjectEditable extends Component
     public $projects;
     public $searchQuery = '';
 
-    public function mount(Task $task)
+    public function mount($taskId)
     {
-        $this->task = $task;
-        $this->projects = Project::where('team_id', $task->team->id)->get();
+        $this->task = Task::find($taskId);
+        $this->projects = Project::where('team_id', $this->task->team->id)->get();
     }
 
     public function updateProject($projectId)

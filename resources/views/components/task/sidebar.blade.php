@@ -4,36 +4,36 @@
         <!-- status Section -->
         <div>
             <div class="font-semibold">Status:</div>
-            <livewire:task-status-editable :task="$task" />
+            <livewire:task-status-editable :taskId="$task->id" />
         </div>
         <!-- Due Date Section -->
         <div>
             <div class="font-semibold">Due Date:</div>
-            <livewire:task-due-date-editable :task="$task" />
+            <livewire:task-due-date-editable :taskId="$task->id" />
         </div>
 
         <!-- Project Section -->
         <div>
             <div class="font-semibold">Project:</div>
-            <livewire:task-project-editable :task="$task" />
+            <livewire:task-project-editable :taskId="$task->id" />
         </div>
 
         <!-- Milestone Section -->
         <div>
             <div class="font-semibold">Milestone:</div>
-            <livewire:task-milestone-editable :task="$task" />
+            <livewire:task-milestone-editable :taskId="$task->id" />
         </div>
 
         <!-- Assigned Users Section -->
         <div>
             <div class="font-semibold">Assigned Users:</div>
-            <livewire:task-assignees-editable :task="$task" />
+            <livewire:task-assignees-editable :taskId="$task->id" />
         </div>
 
         <!-- Priority Section -->
         <div>
             <div class="font-semibold">Priority:</div>
-            <livewire:task-priority-editable :task="$task" />
+            <livewire:task-priority-editable :taskId="$task->id" />
         </div>
     </div>
 

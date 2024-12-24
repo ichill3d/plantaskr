@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [TeamController::class, 'tasks'])->name('organizations.tasks');
 //            Route::get('/{task_id}', [TaskController::class, 'show'])->name('organizations.tasks.show');
             // Task List with Modal (Task Detail)
-            Route::get('/{task_id}', [TeamController::class, 'tasks'])
+            Route::get('/task/{task_id}', [TeamController::class, 'tasks'])
                 ->where('task_id', '[0-9]+') // Ensure task_id is numeric
                 ->name('organizations.tasks.show');
         });

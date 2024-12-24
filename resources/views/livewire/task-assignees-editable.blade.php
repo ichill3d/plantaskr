@@ -24,7 +24,8 @@
         x-show="open"
         @click.away="open = false"
         x-transition.opacity.duration.300ms
-        class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 max-h-64 overflow-y-auto z-10"
+        class="fixed mt-2 bg-white border shadow-lg rounded-md w-64 max-h-64 overflow-y-auto z-10"
+        style="display: none;"
     >
         <div class="flex items-end justify-between px-4 py-2 border-b">
             <div>Assign users to task</div>
@@ -63,17 +64,4 @@
             </label>
         @endforeach
     </div>
-
-    <!-- Success Message -->
-    @if (session()->has('success'))
-        <div
-            x-data="{ visible: true }"
-            x-init="setTimeout(() => visible = false, 2000)"
-            x-show="visible"
-            x-transition.opacity.duration.500ms
-            class="mt-2 text-xs text-green-500"
-        >
-            {{ session('success') }}
-        </div>
-    @endif
 </div>

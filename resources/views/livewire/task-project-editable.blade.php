@@ -13,6 +13,7 @@
         @click.away="open = false"
         x-transition.opacity.duration.300ms
         class="absolute mt-2 bg-white border shadow-lg rounded-md w-64 max-h-64 z-10"
+        style="display: none;"
     >
         <!-- Dropdown Header -->
         <div class="flex items-end justify-between px-4 py-2 border-b">

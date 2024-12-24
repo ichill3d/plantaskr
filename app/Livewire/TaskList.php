@@ -30,7 +30,8 @@ class TaskList extends Component
     protected $listeners = [
         'taskPriorityUpdated' => '$refresh',
         'filterUpdated' => '$refresh',
-        'taskAssigneesUpdated' => '$refresh'
+        'taskAssigneesUpdated' => '$refresh',
+        'refreshTaskList'
     ];
 
 
@@ -43,6 +44,10 @@ class TaskList extends Component
         'sortColumn' => ['except' => 'name'],
         'sortDirection' => ['except' => 'asc'],
     ];
+    public function refreshTaskList()
+    {
+        $this->render();
+    }
     public function filterUpdated($filters = null)
     {
         logger('filterUpdated triggered successfully:', [$filters]);
@@ -196,24 +201,14 @@ class TaskList extends Component
         $lastColumn = $enabledColumns->keys()->last();
         $enabledColumnsCount = $enabledColumns->count();
 
-        $tasks = Task::query()
-            ->when(!empty(array_values($this->selectedUsers)), function ($query) {
-                $query->whereHas('users', function ($query) {
-                    //logger('Inside users whereHas:', array_values($this->selectedUsers));
-                    $query->whereIn('users.id', array_values($this->selectedUsers));
-                });
-            });
-
-        //logger('Generated Query:', [$tasks->toSql()]);
-
 
         $tasks = Task::query()
             ->whereHas('project.team', fn($query) => $query->where('id', $this->teamId))
-            ->when($this->projectId, fn($query) => $query->where('project_id', $this->projectId)) // Filter by projectId
-            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('task_status_id', $this->selectedStatuses)) // Filter by selected statuses
-            ->when(!empty($this->selectedPriorities), fn($query) => $query->whereIn('task_priorities_id', $this->selectedPriorities)) // Filter by selected priorities
-            ->when(!empty($this->selectedUsers), fn($query) => $query->whereHas('assignees', fn($query) => $query->whereIn('users.id', array_values($this->selectedUsers)))) // Filter by assigned users
-            ->when(!empty($this->selectedProjects), fn($query) => $query->whereIn('project_id', $this->selectedProjects)) // Filter by selected projects
+            ->when($this->projectId, fn($query) => $query->where('project_id', $this->projectId))
+            ->when(!empty($this->selectedStatuses), fn($query) => $query->whereIn('task_status_id', $this->selectedStatuses))
+            ->when(!empty($this->selectedPriorities), fn($query) => $query->whereIn('task_priorities_id', $this->selectedPriorities))
+            ->when(!empty($this->selectedUsers), fn($query) => $query->whereHas('assignees', fn($query) => $query->whereIn('users.id', array_values($this->selectedUsers))))
+            ->when(!empty($this->selectedProjects), fn($query) => $query->whereIn('project_id', $this->selectedProjects))
             ->with([
                 'priority:id,name',
                 'creator:id,name',
@@ -225,37 +220,29 @@ class TaskList extends Component
             ->when($this->sortColumn === 'project.name', function ($query) {
                 $query->join('projects as p', 'tasks.project_id', '=', 'p.id')
                     ->select('tasks.*')
-                    ->orderBy('p.id', $this->sortDirection);
+                    ->orderBy('p.name', $this->sortDirection);
             })
             ->when($this->sortColumn === 'priority.name', function ($query) {
                 $query->join('task_priorities as tp', 'tasks.task_priorities_id', '=', 'tp.id')
                     ->select('tasks.*')
-                    ->orderBy('tp.id', $this->sortDirection); // Sort by task_priorities.id
-            })
-            ->when($this->sortColumn === 'm.name', function ($query) {
-                $query->leftJoin('milestones as m', 'tasks.milestone_id', '=', 'm.id')
-                    ->select('tasks.*')
-                    ->orderByRaw("ISNULL(m.name) {$this->sortDirection}, m.name {$this->sortDirection}");
-            })
-            ->when($this->sortColumn === 'u.name', function ($query) {
-                $query->join('users as u', 'tasks.created_by_user_id', '=', 'u.id')
-                    ->select('tasks.*') // Keep the task data intact
-                    ->orderBy('u.name', $this->sortDirection); // Sort by the alias
+                    ->orderBy('tp.name', $this->sortDirection);
             })
             ->when(!in_array($this->sortColumn, ['project.name', 'priority.name']), function ($query) {
                 $query->orderBy($this->sortColumn, $this->sortDirection);
             })
-
             ->get();
+
 
         $team = auth()->user()->currentTeam;
 
-        $statuses = TaskStatus::all(); // Fetch available statuses
-        $priorities = TaskPriority::all(); // Fetch available priorities
-        $users = $team->members()
-            ->get()
-            ->merge([$team->creator]); // Get team members
-        $projects = $team->projects()->get(); // Get team projects
+        $statuses = cache()->remember('task_statuses', 3600, fn() => TaskStatus::all());
+        $priorities = cache()->remember('task_priorities', 3600, fn() => TaskPriority::all());
+        $users = cache()->remember('team_users_' . $team->id, 3600, fn() =>
+        $team->members()->get()->merge([$team->creator])
+        );
+        $projects = cache()->remember('team_projects_' . $team->id, 3600, fn() =>
+        $team->projects()->get()
+        );
 
         return view('livewire.task-list', [
             'tasks' => $tasks,

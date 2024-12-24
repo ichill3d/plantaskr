@@ -7,7 +7,7 @@
             @keydown.window.escape="open = false; Livewire.dispatch('closeTaskModal');"
             x-on:modal-closed.window="
             open = false;
-            history.pushState({}, '', '{{ route('organizations.tasks', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');
+{{--            history.pushState({}, '', '{{ route('organizations.tasks', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');--}}
         "
             x-on:modal-opened="
             open = true;

@@ -12,16 +12,32 @@ class KanbanBoard extends Component
 
     public $selectedTask;
 
-    protected $listeners = ['updateTaskStatus'];
+    protected $listeners = [
+        'updateTaskStatus',
+        'refreshBoard',
+        'refreshTask'
+    ];
 
-
+    public function refreshBoard()
+    {
+        $this->loadTasks();
+    }
     public function mount($teamId)
     {
         $this->teamId = $teamId;
 
         $this->loadTasks();
     }
+    public function refreshTask($taskId)
+    {
+        $task = Task::with(['priority', 'status', 'project', 'assignees', 'team'])->find($taskId);
 
+        if ($task) {
+            $this->tasks[$task->task_status_id] = $this->tasks[$task->task_status_id]->map(function ($t) use ($task) {
+                return $t['id'] === $task->id ? $task->toArray() : $t;
+            });
+        }
+    }
     public function loadTasks()
     {
         $query = Task::query()
@@ -39,61 +55,51 @@ class KanbanBoard extends Component
 
     public function updateTaskOrder($statusId, $taskOrder)
     {
-        // Ensure tasks belong to the correct team and status
         $tasks = Task::where('task_status_id', $statusId)
             ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
             ->get()
             ->keyBy('id');
 
-        // Reorder tasks based on the received taskOrder
         foreach ($taskOrder as $index => $taskId) {
             if (isset($tasks[$taskId])) {
                 $tasks[$taskId]->update(['board_position' => $index + 1]);
             }
         }
 
-        // Reload tasks to reflect updated order
         $this->loadTasks();
+        $this->dispatch('refreshBoard');
     }
+
 
     public function updateTaskStatus($taskId, $statusId, $position)
     {
-
         $task = Task::find($taskId);
 
         if ($task) {
-            // Update the task status
-            $task->task_status_id = $statusId;
-            $task->save();
-            // Fetch tasks in the same status and reorder
+            // Update the task's status and save
+            $task->update(['task_status_id' => $statusId]);
+
+            // Fetch all tasks with the new status, including the moved task
             $tasks = Task::where('task_status_id', $statusId)
                 ->whereHas('project.team', fn($q) => $q->where('id', $this->teamId))
                 ->orderBy('board_position')
                 ->get();
 
-            // Remove the moved task from the list
+            // Remove the moved task temporarily
             $tasks = $tasks->reject(fn($t) => $t->id == $task->id);
 
-            // Insert the moved task into the desired position
+            // Insert the moved task into the correct position
             $tasks->splice($position, 0, [$task]);
 
-            // Update board_position for all tasks
+            // Update board positions for all tasks
             foreach ($tasks as $index => $t) {
                 $t->update(['board_position' => $index + 1]);
             }
 
             $this->loadTasks(); // Reload tasks to reflect changes
+            $this->dispatch('refreshBoard'); // Refresh frontend dynamically
         }
     }
-
-
-
-
-
-
-
-
-
 
     public function render()
     {
