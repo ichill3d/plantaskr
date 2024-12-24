@@ -201,7 +201,6 @@ class TaskList extends Component
         $lastColumn = $enabledColumns->keys()->last();
         $enabledColumnsCount = $enabledColumns->count();
 
-
         $tasks = Task::query()
             ->whereHas('project.team', fn($query) => $query->where('id', $this->teamId))
             ->when($this->projectId, fn($query) => $query->where('project_id', $this->projectId))
@@ -230,7 +229,7 @@ class TaskList extends Component
             ->when(!in_array($this->sortColumn, ['project.name', 'priority.name']), function ($query) {
                 $query->orderBy($this->sortColumn, $this->sortDirection);
             })
-            ->get();
+            ->paginate(20);
 
 
         $team = auth()->user()->currentTeam;
@@ -243,6 +242,7 @@ class TaskList extends Component
         $projects = cache()->remember('team_projects_' . $team->id, 3600, fn() =>
         $team->projects()->get()
         );
+
 
         return view('livewire.task-list', [
             'tasks' => $tasks,

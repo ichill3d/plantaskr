@@ -9,15 +9,14 @@ use App\Models\TaskPriority;
 class TaskPriorityEditable extends Component
 {
     public Task $task;
-
-    public $priorities;
+    public $priorities = [];
     public $selectedPriority;
 
     public function mount(int $taskId)
     {
-        $this->task = Task::find($taskId ?? null);
-        $this->priorities = TaskPriority::all(); // Using Priority model here
-        $this->selectedPriority = $task->priority->id ?? null;
+        $this->task = Task::findOrFail($taskId);
+        $this->priorities = TaskPriority::all();
+        $this->selectedPriority = $this->task->priority->id ?? null;
     }
 
     public function updatePriority($priorityId)
@@ -29,8 +28,10 @@ class TaskPriorityEditable extends Component
             $this->task->save();
 
             $this->selectedPriority = $priorityId;
-            $this->dispatch('priorityUpdated', $priorityId);
-            session()->flash('success', 'Task priority updated successfully!');
+
+            // Dispatch events
+            $this->dispatch('reloadTask', ['taskId' => $this->task->id]);
+            $this->dispatch('reloadTaskSidebar', ['taskId' => $this->task->id]);
         }
     }
 

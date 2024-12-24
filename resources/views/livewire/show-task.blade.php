@@ -88,15 +88,7 @@
 
         <!-- Sidebar (Sticky + Scrollable) -->
         <div class="bg-gray-100 shadow rounded-lg p-6 space-y-4 sticky top-4 overflow-y-auto h-[calc(100vh-6rem)]">
-            @include('components.task.sidebar', [
-                'task' => $task,
-                'statuses' => $statuses,
-                'priorities' => $priorities,
-                'milestones' => $milestones,
-                'teamMembers' => $teamMembers,
-                'roles' => $roles
-            ])
-
+           <livewire:task-sidebar :task="$task" />
             <!-- Files Section -->
             <div class="mt-6">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Files</h2>

@@ -33,7 +33,34 @@
         <!-- Priority Section -->
         <div>
             <div class="font-semibold">Priority:</div>
-            <livewire:task-priority-editable :taskId="$task->id" />
+            <div
+                x-data="{ open: false }"
+                x-on:taskpriorityselected.window="if ($event.detail.taskId == {{ $task->id }}) open = false"
+                class="relative"
+            >
+                <!-- Button for Displaying Current Priority -->
+                <button
+                    @click="open = !open"
+                    class="px-2 py-1 text-white rounded-md"
+                    style="background-color: {{ $task->priority_color ?? '#ccc' }};"
+                >
+                    <span>{{ $task->priority->name }}</span>
+                </button>
+
+                <!-- Dropdown with Livewire Editable Component -->
+                <div
+                    x-show="open"
+                    @click.away="open = false"
+                    x-transition.opacity.duration.300ms
+                    class="absolute bg-white border rounded-md shadow-lg w-32 z-10"
+                    style="display: none;"
+                >
+                    <livewire:task-priority-editable
+                        :taskId="$task->id"
+                        wire:key="task-{{ $task->id }}-priority"
+                    />
+                </div>
+            </div>
         </div>
     </div>
 

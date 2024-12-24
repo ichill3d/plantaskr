@@ -9,29 +9,33 @@ use App\Models\Milestone;
 class TaskMilestoneEditable extends Component
 {
     public Task $task;
-    public $milestones;
+    public $milestones = [];
     public $selectedMilestone;
 
     public function mount($taskId)
     {
-        $this->task = Task::find($taskId);
-        $this->milestones =  $this->task->project?->milestones ?? collect();
-        $this->selectedMilestone =  $this->task->milestone->id ?? null;
+        $this->task = Task::findOrFail($taskId);
+        $this->milestones = Milestone::all();
+        $this->selectedMilestone = $this->task->milestone->id ?? null;
     }
 
     public function updateMilestone($milestoneId)
     {
-        $milestone = Milestone::find($milestoneId);
-
-        if ($milestone) {
-            $this->task->milestone()->associate($milestone);
-            $this->task->save();
-
-            $this->selectedMilestone = $milestoneId;
-            $this->dispatch('milestoneUpdated', $milestoneId);
-            session()->flash('success', 'Task milestone updated successfully!');
+        if ($milestoneId === null) {
+            $this->task->milestone()->dissociate();
+        } else {
+            $milestone = Milestone::find($milestoneId);
+            if ($milestone) {
+                $this->task->milestone()->associate($milestone);
+            }
         }
+
+        $this->task->save();
+        $this->selectedMilestone = $milestoneId;
+        $this->dispatch('reloadTask', ['taskId' => $this->task->id]);
+        $this->dispatch('reloadTaskSidebar', ['taskId' => $this->task->id]);
     }
+
 
     public function render()
     {

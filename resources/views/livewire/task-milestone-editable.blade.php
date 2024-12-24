@@ -1,29 +1,44 @@
-<div x-data="{ open: false }" class="relative">
-    <!-- Current Milestone Display -->
-    <button
-        @click="open = !open"
-        class="text-sm hover:underline hover:text-blue-600"
-    >
-        {{ $task->milestone->name ?? 'N/A' }}
-    </button>
+<div>
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-2 border-b">
+        <div>Change Task Milestone</div>
+        <button
+            class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-2 py-1"
+            @click="$dispatch('milestoneupdated', { taskId: {{ $task->id }} })"
+        >
+            OK
+        </button>
+    </div>
 
-    <!-- Milestone Dropdown -->
-    <div
-        x-show="open"
-        @click.away="open = false"
-        x-transition.opacity.duration.300ms
-        class="absolute mt-1 bg-white border shadow-lg rounded-md w-48 max-h-40 overflow-y-auto z-10"
-        style="display: none;"
-    >
+    <!-- Milestone List -->
+    <div class="max-h-48 overflow-y-auto divide-y">
+        <!-- No Milestone Option -->
+        <div
+            wire:click="updateMilestone(null)"
+            @click="$dispatch('milestoneupdated', { taskId: {{ $task->id }} })"
+            class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer {{ $selectedMilestone === null ? 'bg-gray-200 font-bold' : '' }}"
+        >
+            <span class="ml-2 text-sm">No Milestone</span>
+        </div>
+
+        <!-- List of Milestones -->
         @foreach ($milestones as $milestone)
-            <button
-                wire:click.prevent="updateMilestone({{ $milestone->id }})"
-                @click="open = false"
-                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+            <div
+                wire:click="updateMilestone({{ $milestone->id }})"
+                @click="$dispatch('milestoneupdated', { taskId: {{ $task->id }} })"
+                class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer {{ $selectedMilestone == $milestone->id ? 'bg-gray-200 font-bold' : '' }}"
             >
-                {{ $milestone->name }}
-            </button>
+                <span class="ml-2 text-sm">{{ $milestone->name }}</span>
+            </div>
         @endforeach
     </div>
 
+
+    @if (session()->has('success'))
+        <div class="mt-2 text-green-500 text-sm">{{ session('success') }}</div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="mt-2 text-red-500 text-sm">{{ session('error') }}</div>
+    @endif
 </div>

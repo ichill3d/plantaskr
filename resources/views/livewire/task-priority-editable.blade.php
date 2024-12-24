@@ -1,29 +1,23 @@
-<div x-data="{ open: false }" class="relative">
-    <!-- Priority Display -->
-    <button
-        @click="open = !open"
-        class="px-2 py-1 text-white rounded-md"
-        style="background-color: {{ $task->priority_color ?? '#ccc' }}"
-    >
-        {{ $task->priority->name ?? 'N/A' }}
-    </button>
-
-    <!-- Priority Dropdown -->
-    <div
-        x-show="open"
-        @click.away="open = false"
-        x-transition.opacity.duration.300ms
-        class="absolute mt-1 bg-white border rounded-md shadow-lg w-32 z-10"
-        style="display: none;"
-    >
+<div style="">
+    <div class="text-sm font-medium mb-2 px-2">Select Priority:</div>
+    <div class="border rounded-md shadow-md overflow-hidden">
         @foreach ($priorities as $priority)
             <button
                 wire:click.prevent="updatePriority({{ $priority->id }})"
-                @click="open = false"
-                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                @click="$dispatch('taskpriorityselected', { taskId: {{ $task->id }} })"
+                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $selectedPriority == $priority->id ? 'bg-gray-200 font-bold' : '' }}"
+                style="background-color: {{ $priority->color ?? '#fff' }};"
             >
                 {{ $priority->name }}
             </button>
         @endforeach
     </div>
+
+    @if (session()->has('success'))
+        <div class="mt-2 text-green-500">{{ session('success') }}</div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="mt-2 text-red-500">{{ session('error') }}</div>
+    @endif
 </div>

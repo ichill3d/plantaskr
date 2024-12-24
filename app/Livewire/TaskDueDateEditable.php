@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Task;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class TaskDueDateEditable extends Component
 {
@@ -13,21 +13,22 @@ class TaskDueDateEditable extends Component
 
     public function mount($taskId)
     {
-        $this->task = Task::find($taskId);
+        $this->task = Task::findOrFail($taskId);
         $this->dueDate = $this->task->due_date ? $this->task->due_date->format('Y-m-d') : null;
     }
 
-    public function updateDueDate($date)
+    public function updateDueDate(bool $deleteDueDate = false)
     {
-        $parsedDate = $date ? Carbon::parse($date) : null;
-
-        $this->task->due_date = $parsedDate;
+        logger('Received date:', ['dueDate' => $this->dueDate]);
+            // Use the bound $this->dueDate
+        if($deleteDueDate) {
+            $this->task->due_date = null;
+        } else {
+            $this->task->due_date = Carbon::parse($this->dueDate);
+        }
         $this->task->save();
-
-        $this->dueDate = $parsedDate ? $parsedDate->format('Y-m-d') : null;
-
-        $this->dispatch('dueDateUpdated', $parsedDate);
-        session()->flash('success', 'Task due date updated successfully!');
+        $this->dispatch('reloadTask', ['taskId' => $this->task->id]);
+        $this->dispatch('reloadTaskSidebar', ['taskId' => $this->task->id]);
     }
 
     public function render()
