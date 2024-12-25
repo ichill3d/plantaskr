@@ -45,7 +45,7 @@
                                 Cancel
                             </button>
                             <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                                    @click="$wire.updateTaskColumns(tempColumns); open = false;">
+                                    x-on:click="$wire.updateTaskColumns(tempColumns); open = false;Livewire.dispatch('refreshTaskList')">
                                 Save
                             </button>
                         </div>
@@ -487,21 +487,56 @@
 
 
 
-    <!-- Task List -->
-    <div class="space-y-4 mt-4">
-        @forelse($tasks as $task)
-            <livewire:task-in-list
-                :task="$task"
-                :columns="$columns"
-                :lastColumn="$lastColumn"
-                wire:key="task-{{ $task->id }}"
-            />
-        @empty
-            <div class="text-center text-gray-500">
-                No tasks found.
+    <div
+        x-data="{
+        loading: false,
+        loadMore() {
+            if (this.loading) return;
+            this.loading = true;
+            $wire.call('loadMoreTasks').then(() => {
+                this.loading = false;
+                // Reset intersection observer
+                this.$nextTick(() => {
+                    const trigger = document.getElementById('load-more-trigger');
+                    if (trigger) {
+                        trigger._x_intersect = false; // Reset Alpine's intersect state
+                    }
+                });
+            });
+        }
+    }"
+    >
+        <div class="space-y-4 mt-4">
+            @forelse($tasks as $task)
+                <livewire:task-in-list
+                    :task="$task"
+                    :columns="$columns"
+                    :enabledColumnsCount="$enabledColumnsCount"
+                    :lastColumn="$lastColumn"
+                    wire:key="task-{{ $task->id }}"
+                />
+            @empty
+                <div class="text-center text-gray-500">
+                    No tasks found.
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Infinite Scroll Trigger -->
+        <div
+            id="load-more-trigger"
+            x-intersect="loadMore()"
+            class="h-10"
+        >
+            <!-- Loading Indicator -->
+            <div x-show="loading" class="text-center text-gray-500 mt-4">
+                Loading more tasks...
             </div>
-        @endforelse
+        </div>
     </div>
+
+
+
     <!-- Task Modal Livewire Component -->
 
     <livewire:task-modal :taskId="$selectedTask?->id" />

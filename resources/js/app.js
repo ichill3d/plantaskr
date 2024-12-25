@@ -23,5 +23,6 @@ import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.e
 import './tiptap.config.js';
 
 import sort from '@alpinejs/sort';
-Alpine.plugin(sort);
+import {intersect} from "@alpinejs/intersect";
+Alpine.plugin(sort, intersect);
 Livewire.start();

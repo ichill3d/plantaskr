@@ -17,6 +17,7 @@
         "vite": "6.0"
     },
     "dependencies": {
+        "@alpinejs/intersect": "^3.14.8",
         "@alpinejs/sort": "^3.14.7",
         "@tiptap-pro/extension-file-handler": "^2.16.3",
         "@tiptap-pro/extension-unique-id": "^2.16.3",

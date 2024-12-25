@@ -19,10 +19,9 @@
             {{ $task->project->name }}
         </div>
     </a>
-
     <!-- Task Details -->
     <div class="grid gap-4 text-sm text-gray-600 px-4 py-2"
-         style="grid-template-columns: repeat({{ count($columns) }}, minmax(0, 1fr));">
+         style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
 
         @if($columns['priority'])
             <div class="col-span-1">

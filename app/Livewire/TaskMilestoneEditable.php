@@ -15,7 +15,7 @@ class TaskMilestoneEditable extends Component
     public function mount($taskId)
     {
         $this->task = Task::findOrFail($taskId);
-        $this->milestones = Milestone::all();
+        $this->milestones = $this->task->project->milestones ?? collect();
         $this->selectedMilestone = $this->task->milestone->id ?? null;
     }
 

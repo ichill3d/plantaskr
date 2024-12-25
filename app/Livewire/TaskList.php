@@ -26,12 +26,11 @@ class TaskList extends Component
     public $selectedProjects = [];
 
     public $selectedTask;
+    public $perPage = 20;
 
     protected $listeners = [
-        'taskPriorityUpdated' => '$refresh',
-        'filterUpdated' => '$refresh',
-        'taskAssigneesUpdated' => '$refresh',
-        'refreshTaskList'
+        'refreshTaskList',
+        'loadMoreTasks'
     ];
 
 
@@ -47,10 +46,6 @@ class TaskList extends Component
     public function refreshTaskList()
     {
         $this->render();
-    }
-    public function filterUpdated($filters = null)
-    {
-        logger('filterUpdated triggered successfully:', [$filters]);
     }
 
     public function mount()
@@ -130,68 +125,28 @@ class TaskList extends Component
 
     public function updateTaskColumns($updatedColumns)
     {
-
         $this->columns = $updatedColumns;
 
         // Save to the database
         $user = auth()->user();
         $user->task_columns = $updatedColumns;
         $user->save();
+
+        $enabledColumns = collect($this->columns)->filter(fn($isEnabled) => $isEnabled);
+        $lastColumn = $enabledColumns->keys()->last();
+        $enabledColumnsCount = $enabledColumns->count();
+
+        // Dispatch a refresh event with the updated columns
+        $this->dispatch('updateTaskInListColumns', [
+            'updatedColumns' =>$updatedColumns,
+            'lastColumn' => $lastColumn,
+            'enabledColumnsCount' => $enabledColumnsCount]);
     }
 
 
-    public function updateTaskPriority($taskId, $priorityId)
+    public function loadMoreTasks()
     {
-        $task = Task::find($taskId);
-        if ($task) {
-            $task->task_priorities_id = $priorityId;
-            $task->save();
-            session()->flash('success', 'Task priority updated successfully.');
-        }
-    }
-    public function updateTaskStatus($taskId, $statusId)
-    {
-        $task = Task::find($taskId);
-        if ($task) {
-            $task->task_status_id = $statusId; // Update status
-            $task->save();
-            session()->flash('success', 'Task status updated successfully.');
-        }
-    }
-    public function updateTaskMilestone($taskId, $milestoneId)
-    {
-        $task = Task::find($taskId);
-        if ($task) {
-            $task->milestone_id = $milestoneId;
-            $task->save();
-            session()->flash('success', 'Assigned to milstone successfully.');
-        }
-    }
-    public function updateTaskDueDate($taskId, $dueDate)
-    {
-        $task = Task::find($taskId);
-        if ($task) {
-            $task->due_date = $dueDate; // Update due date
-            $task->save();
-            session()->flash('success', 'Due Date changed successfully.');
-        }
-    }
-    public function assignUserToTask($taskId, $userId)
-    {
-        $task = Task::find($taskId);
-        if ($task && !$task->assignees->contains($userId)) {
-            $task->assignees()->attach($userId, ['role_id' => 2]);
-            session()->flash('success', 'User Assigned successfully.');
-        }
-    }
-
-    public function unassignUserFromTask($taskId, $userId)
-    {
-        $task = Task::find($taskId);
-        if ($task && $task->assignees->contains($userId)) {
-            $task->assignees()->detach($userId);
-            session()->flash('success', 'User removed from task.');
-        }
+        $this->perPage += 20; // Load 20 more tasks on each call
     }
 
     public function render()
@@ -229,7 +184,7 @@ class TaskList extends Component
             ->when(!in_array($this->sortColumn, ['project.name', 'priority.name']), function ($query) {
                 $query->orderBy($this->sortColumn, $this->sortDirection);
             })
-            ->paginate(20);
+            ->paginate($this->perPage);
 
 
         $team = auth()->user()->currentTeam;
