@@ -20,6 +20,7 @@ class ShowTask extends Component
     public $statuses;
     public $priorities;
     public $milestones;
+    public $origin;
     public $teamMembers;
     public $roles;
     public $description;

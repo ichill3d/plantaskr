@@ -41,7 +41,7 @@
         @endforeach
     </div>
 
-    <livewire:task-modal :taskId="$selectedTask?->id" />
+    <livewire:task-modal :taskId="$selectedTask?->id" :origin="'board'"/>
 
     <script>
         window.addEventListener('popstate', () => {

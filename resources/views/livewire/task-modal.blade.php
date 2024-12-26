@@ -7,7 +7,6 @@
             @keydown.window.escape="open = false; Livewire.dispatch('closeTaskModal');"
             x-on:modal-closed.window="
             open = false;
-{{--            history.pushState({}, '', '{{ route('organizations.tasks', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');--}}
         "
             x-on:modal-opened="
             open = true;
@@ -21,12 +20,9 @@
             <!-- Modal Content -->
             <div class="fixed inset-0 flex items-center justify-center p-4  ">
                 <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl h-[90vh]  relative overflow-hidden">
-                    <!-- Close Button -->
-
-
                     <!-- Task Content -->
                     <div class="p-4 h-full overflow-hidden">
-                        <livewire:show-task :taskId="$task->id" />
+                        <livewire:show-task :taskId="$task->id" :origin="$origin" />
                     </div>
                 </div>
             </div>

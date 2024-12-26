@@ -19,7 +19,12 @@
             @click="
                 Livewire.dispatch('closeTaskModal');
                 open = false;
-                history.pushState({}, '', '{{ route('organizations.tasks', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');
+                if('{{$origin}}' == 'taskList') {
+                    history.pushState({}, '', '{{ route('organizations.tasks', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');
+                } else {
+                    history.pushState({}, '', '{{ route('organizations.board', ['id' => $task->team->id, 'organization_alias' => $task->team->alias]) }}');
+                }
+{{--                --}}
             "
             class="text-gray-500 hover:text-gray-700 p-1 px-2 rounded-lg bg-gray-100 hover:bg-gray-200"
         >

@@ -8,6 +8,7 @@ use App\Models\Task;
 class TaskModal extends Component
 {
     public $task;
+    public $origin;
 
     protected $listeners = [
         'openTaskModal' => 'loadTask',

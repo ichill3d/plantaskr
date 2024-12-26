@@ -434,7 +434,7 @@
 
     <!-- Task Modal Livewire Component -->
 
-    <livewire:task-modal :taskId="$selectedTask?->id" />
+    <livewire:task-modal :taskId="$selectedTask?->id" :origin='"taskList"' />
 
 </div>
 
