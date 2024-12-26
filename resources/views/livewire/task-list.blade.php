@@ -1,16 +1,35 @@
 <div class="relative h-full overflow-y-auto max-h-[calc(100vh-10rem)]">
 
     <!-- Header -->
-    <div x-data="{ toggleAllFilters: false }" class="sticky top-0 z-10 bg-white shadow text-sm font-semibold text-gray-600  border-b pb-2">
+    <div class="sticky top-0 z-10 bg-white shadow text-sm font-semibold text-gray-600  border-b pb-2">
         <div  class="flex flex-row gap-4 w-full justify-between  px-4 py-2 "
              style="grid-template-columns: repeat({{ $enabledColumnsCount }}, minmax(0, 1fr));">
-            <div class="flex items-start justify-start gap-2" >
-                <div class=" text-left cursor-pointer" wire:click="sortBy('name')">
+            <div class="flex items-center justify-start gap-2" >
+
+                <div class="text-left cursor-pointer" wire:click="sortBy('name')">
                     Task Name
                     @if($sortColumn === 'name')
                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                     @endif
                 </div>
+                <div class="ml-4 relative">
+                    <input
+                        type="text"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="Search tasks..."
+                        class="inline-block text-sm w-40 px-4 py-2 border rounded pr-8"
+                    />
+                    @if($search)
+                        <button
+                            type="button"
+                            wire:click="$set('search', '')"
+                            class="absolute text-xl p-1 rounded-lg  right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            &times;
+                        </button>
+                    @endif
+                </div>
+
                 <div class="relative inline-block ml-2"  x-data="{ open: false, tempColumns: @js($columns) }">
                     <button class="text-blue-500 hover:underline" @click="open = true">Edit Columns</button>
                     <button
@@ -51,6 +70,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <div x-data="{ showFilter: false, searchQuery: '' }" class="text-right pr-4 cursor-pointer">
@@ -352,131 +372,6 @@
                     @endif
                 </div>
             @endif
-        </div>
-
-        <div class="flex flex-col hidden">
-
-            <div x-show="toggleAllFilters" class=" p-2 px-4 bg-white shadow-md border-b">
-            <div class="flex space-x-8 items-start">
-                <!-- Status Filter -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Status</h3>
-                        <button
-                            @click="$wire.set('selectedStatuses', [])"
-                            class="text-blue-500 text-xs hover:underline"
-                        >
-                            [Clear]
-                        </button>
-                    </div>
-
-                    <div class="space-y-2">
-                        @foreach($statuses as $status)
-                            <label class="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    wire:model.live="selectedStatuses"
-                                    value="{{ $status->id }}"
-                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                                >
-                                <span class="text-sm">{{ $status->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-
-                <!-- Priority Filter -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Priority</h3>
-                        <button
-                            @click="$wire.set('selectedPriorities', [])"
-                            class="text-blue-500 text-xs hover:underline"
-                        >
-                            [Clear]
-                        </button>
-                    </div>
-                    <div class="space-y-2">
-                        @foreach($priorities as $priority)
-                            <label class="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    wire:model.live="selectedPriorities"
-                                    x-ref="priority_{{ $priority->id }}"
-                                    value="{{ $priority->id }}"
-                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                                >
-                                <span class="text-sm">{{ $priority->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-
-                <!-- Assigned Users Filter -->
-                <div x-data="{ userSearch: '', filteredUsers: @js($users) }">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-700">Assigned Users</h3>
-                        <button
-                            @click="userSearch = ''; $wire.set('selectedUsers', [])"
-                            class="text-blue-500 text-xs hover:underline"
-                        >
-                            [Clear]
-                        </button>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        x-model="userSearch"
-                        class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
-                    >
-                    <div class="space-y-2 max-h-48 overflow-y-auto">
-                        <template x-for="user in filteredUsers.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()))" :key="user.id">
-                            <label class="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    :value="user.id"
-                                    wire:model.live="selectedUsers"
-                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                                >
-                                <span class="text-sm" x-text="user.name"></span>
-                            </label>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Project Filter -->
-                <div x-data="{ projectSearch: '', filteredProjects: @js($projects) }">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-sm font-semibold text-gray-700">Projects</h3>
-                        <button
-                            @click="projectSearch = ''; $wire.set('selectedProjects', [])"
-                            class="text-blue-500 text-xs hover:underline"
-                        >
-                            [Clear]
-                        </button>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search projects..."
-                        x-model="projectSearch"
-                        class="w-full mb-2 text-sm border rounded-md focus:ring focus:ring-blue-500"
-                    >
-                    <div class="space-y-2 max-h-48 overflow-y-auto">
-                        <template x-for="project in filteredProjects.filter(p => p.name.toLowerCase().includes(projectSearch.toLowerCase()))" :key="project.id">
-                            <label class="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    :value="project.id"
-                                    wire:model.live="selectedProjects"
-                                    class="rounded border-gray-300 text-blue-500 focus:ring focus:ring-blue-500"
-                                >
-                                <span class="text-sm" x-text="project.name"></span>
-                            </label>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
         </div>
 
     </div>

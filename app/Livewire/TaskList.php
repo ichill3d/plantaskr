@@ -26,13 +26,13 @@ class TaskList extends Component
     public $selectedProjects = [];
 
     public $selectedTask;
+    public $search = '';
     public $perPage = 20;
 
     protected $listeners = [
         'refreshTaskList',
         'loadMoreTasks'
     ];
-
 
     // Bind filters and sorting to the query string
     protected $queryString = [
@@ -55,8 +55,6 @@ class TaskList extends Component
     }
     public function updateFilter(array $filters)
     {
-
-        logger('Filters received in updateFilter:', $filters);
 
         $this->selectedUsers = $filters['selectedUsers'] ?? [];
         $this->selectedProjects = $filters['selectedProjects'] ?? [];
@@ -163,6 +161,10 @@ class TaskList extends Component
             ->when(!empty($this->selectedPriorities), fn($query) => $query->whereIn('task_priorities_id', $this->selectedPriorities))
             ->when(!empty($this->selectedUsers), fn($query) => $query->whereHas('assignees', fn($query) => $query->whereIn('users.id', array_values($this->selectedUsers))))
             ->when(!empty($this->selectedProjects), fn($query) => $query->whereIn('project_id', $this->selectedProjects))
+            ->when($this->search, fn($query) => $query->where(function ($subQuery) {
+                $subQuery->where('tasks.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('tasks.description', 'like', '%' . $this->search . '%');
+            }))
             ->with([
                 'priority:id,name',
                 'creator:id,name',
@@ -185,6 +187,7 @@ class TaskList extends Component
                 $query->orderBy($this->sortColumn, $this->sortDirection);
             })
             ->paginate($this->perPage);
+
 
 
         $team = auth()->user()->currentTeam;
