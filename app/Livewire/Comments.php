@@ -47,6 +47,7 @@ class Comments extends Component
             'content' => $sanitizedContent,
         ]);
 
+        $this->dispatch('comment-posted');
         // Reset the input and reload comments
         $this->content = '';
         $this->loadComments();

@@ -1,58 +1,105 @@
+<div class="space-y-8">
 
-
+    <!-- Success Message -->
     @if (session()->has('success'))
-        <div class="mb-4 p-4 text-green-800 bg-green-100 rounded">
+        <div class="p-4 text-green-800 bg-green-100 rounded shadow-sm">
             {{ session('success') }}
         </div>
     @endif
 
-    <form wire:submit.prevent="save">
-        <!-- Project Name -->
-        <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Project Name</label>
-            <input wire:model="name" type="text" id="name"
-                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-            @error('name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+    <!-- Project Settings Form -->
+    <form wire:submit.prevent="save" class="space-y-6">
+
+        <!-- Project Details -->
+        <div class="p-6 bg-white border rounded-md shadow-sm">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2">Project Details</h2>
+
+            <!-- Project Name -->
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Project Name</label>
+                <input wire:model="name" type="text" id="name"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                @error('name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <x-tiptap
+                    wire:model="description"
+                    projectId="{{ $project->id }}"
+                ></x-tiptap>
+                @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
+                    Save Changes
+                </button>
+            </div>
         </div>
 
-        <!-- Description -->
-        <div class="mb-4">
-            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-            <x-tiptap
-                wire:model="description"
-                projectId="{{ $project->id }}"
-            ></x-tiptap>
-            @error('description') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+        <!-- Appearance Settings -->
+        <div class="p-6 bg-white border rounded-md shadow-sm">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2">Appearance</h2>
+
+            <!-- Project Color (Debounced Update with Auto-Hide) -->
+            <div class="mb-4" x-data="{ color: '{{ $color }}', timer: null }">
+                <label for="color" class="block text-sm font-medium text-gray-700">Project Color</label>
+                <input
+                    type="color"
+                    id="color"
+                    x-model="color"
+                    @input.debounce.500ms="
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                $wire.set('color', color).then(() => {
+                    $el.blur(); // Hide the color picker after saving
+                });
+            }, 500);
+        "
+                    @change="$el.blur()"
+                    class="mt-1 block w-20 h-10 border-gray-300 rounded-md shadow-sm"
+                >
+                @error('color')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+
+                @if (session()->has('color_success'))
+                    <p class="text-green-500 text-sm mt-1">{{ session('color_success') }}</p>
+                @endif
+            </div>
+
+
+
+
         </div>
 
-        <!-- Project Color -->
-        <div class="mb-4">
-            <label for="color" class="block text-sm font-medium text-gray-700">Project Color</label>
-            <input wire:model="color" type="color" id="color"
-                   class="mt-1 block w-20 h-10 border-gray-300 rounded-md shadow-sm">
-            @error('color') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-        </div>
+        <!-- Save Changes Button (For Name and Description Only) -->
 
-        <!-- Assign Team Members -->
-{{--        <div class="mb-4">--}}
-{{--            <label class="block text-sm font-medium text-gray-700">Team Members</label>--}}
-{{--            <div class="mt-2 space-y-2">--}}
-{{--                @foreach ($teamMembers as $member)--}}
-{{--                    <div class="flex items-center space-x-3">--}}
-{{--                        <input wire:model="assignedMembers" type="checkbox" value="{{ $member->id }}"--}}
-{{--                               id="member_{{ $member->id }}"--}}
-{{--                               class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">--}}
-{{--                        <label for="member_{{ $member->id }}" class="text-gray-800">{{ $member->name }}</label>--}}
-{{--                    </div>--}}
-{{--                @endforeach--}}
-{{--            </div>--}}
-{{--            @error('assignedMembers') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror--}}
-{{--        </div>--}}
-
-        <!-- Submit Button -->
-        <div class="flex justify-end mt-6">
-{{--            <button type="button" wire:click="$emit('cancelEditing')" class="btn btn-secondary mr-3">Cancel</button>--}}
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
     </form>
 
+    <!-- Danger Zone: Project Deletion -->
+    <div class="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm">
+        <h2 class="text-lg font-semibold text-red-600 mb-4 border-b border-red-200 pb-2">Danger Zone</h2>
+
+        <p class="text-sm text-red-700 mb-4">
+            Deleting this project is irreversible. All associated data will be permanently removed.
+        </p>
+
+        <button
+            type="button"
+            @click.stop="$dispatch('usermessage-show', {
+                type: 'confirm',
+                title: 'Confirm Project Deletion',
+                message: 'Are you sure you want to delete this Project?',
+                action: () => {
+                    $wire.deleteProject({{ $project->id }})
+                }
+            })"
+            class="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600"
+        >
+            Delete Project
+        </button>
+    </div>
+</div>

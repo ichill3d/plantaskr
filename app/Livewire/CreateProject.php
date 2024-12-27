@@ -26,18 +26,19 @@ class CreateProject extends Component
         $this->validate();
 
         // Create the project
-        Project::create([
+        $project = Project::create([
             'name' => $this->name,
             'description' => $this->description,
             'color' => $this->color,
             'team_id' => $this->teamId,
         ]);
 
-        // Emit event to notify parent components or reset form
-        $this->reset(['name', 'description', 'color', 'showModal']);
-        $this->dispatch('projectCreated');
-
-        session()->flash('success', 'Project created successfully!');
+        // Redirect to the project's team page
+        return redirect()->route('organizations.projects.show', [
+            'id' => $project->team_id,
+            'organization_alias' => $project->team->alias ?? null,
+            'project_id' => $project->id,
+        ], 301);
     }
 
     public function updatedDescription($value)

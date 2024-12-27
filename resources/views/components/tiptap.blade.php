@@ -1,4 +1,5 @@
 <div
+    class="bg-gray-200 border border-gray-200 rounded-md p-1"
     x-data="editor(
         @entangle($attributes->wire('model')->value()).live,
         value => $wire.set('{{ $attributes->wire('model')->value() }}', value)
@@ -9,12 +10,12 @@
     {{ $attributes->except(['wire:model', 'taskId', 'projectId']) }}
 >
     <template x-if="isLoaded()">
-        <div class="menu flex space-x-2 mb-2 border-b pb-2">
+        <div class="menu flex space-x-2 pb-1">
             <button
                 type="button"
-                class="px-3 py-1 border rounded-md hover:bg-gray-100"
+                class="px-3 py-1 border bg-gray-100 rounded-md hover:bg-gray-50"
                 @click="toggleHeading({ level: 2 })"
-                :class="{ 'bg-gray-200 font-bold': isActive('heading', { level: 2 }) }"
+                :class="{ 'bg-gray-200': isActive('heading', { level: 2 }) }"
             >
                 H1
             </button>

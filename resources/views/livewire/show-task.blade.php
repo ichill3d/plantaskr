@@ -65,34 +65,58 @@
     </div>
 
     <!-- Main Layout Grid -->
-    <div class="grid grid-cols-[2fr_1fr] gap-4 h-[calc(100vh-17rem)] overflow-hidden">
+    <div class="grid grid-cols-[2fr_1fr] gap-4 h-[calc(100vh-13rem)] overflow-hidden">
 
         <!-- Main Content Area (Scrollable) -->
-        <div class="overflow-y-auto p-4 bg-white rounded-md border border-gray-200 h-[calc(100vh-17rem)] ">
+        <div class="overflow-y-auto  h-[calc(100vh-15rem)] ">
+
             <!-- Task Description -->
-            @if (!$isEditingDescription)
-                <div class="cursor-pointer prose prose-compact" wire:click="toggleEditDescription">
-                    {!! $description !!}
-                </div>
-            @else
-                <div>
-                    <x-tiptap wire:model="description" taskId="{{ $task->id }}"></x-tiptap>
-                    <div class="mt-2 flex space-x-2">
-                        <button wire:click="saveDescription" class="btn btn-primary">Save</button>
-                        <button wire:click="$set('isEditingDescription', false)" class="btn btn-secondary">Cancel</button>
+            <div class="p-4 bg-white rounded-md border border-gray-200">
+
+                @if (!$isEditingDescription)
+                    <div class="prose prose-compact text-gray-800">
+                        {!! $description !!}
                     </div>
-                </div>
-            @endif
+
+                @else
+                    <div>
+                        <x-tiptap wire:model="description" taskId="{{ $task->id }}"></x-tiptap>
+                        <div class="mt-2 flex space-x-2">
+                            <button
+                                wire:click="saveDescription"
+                                class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            >
+                                Save
+                            </button>
+                            <button
+                                wire:click="$set('isEditingDescription', false)"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+            </div>
+            <div class="mt-2">
+                <button
+                    wire:click="toggleEditDescription"
+                    class="text-sm  px-2 py-1 border bg-gray-200 hover:text-gray-800 hover:bg-gray-300 rounded-md"
+                >
+                    Edit Description
+                </button>
+            </div>
+
 
             <!-- Discussion Section -->
             <div class="mt-6">
-                <h2 class="text-lg font-semibold text-gray-700 mb-2">Discussion</h2>
                 <livewire:comments type="tasks" :parentId="$task->id" />
             </div>
         </div>
 
         <!-- Sidebar (Sticky + Scrollable) -->
-        <div class="bg-gray-100 shadow rounded-lg p-6 space-y-4 sticky top-4 overflow-y-auto h-[calc(100vh-6rem)]">
+        <div class="bg-gray-100 shadow rounded-lg p-6 space-y-4 sticky top-4 overflow-y-auto h-[calc(100vh-13rem)]">
            <livewire:task-sidebar :task="$task" />
             <!-- Files Section -->
             <div class="mt-6">

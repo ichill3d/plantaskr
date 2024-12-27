@@ -54,7 +54,25 @@ class EditProject extends Component
             'tab' => 'settings',
         ]);
     }
+    public function updatedColor()
+    {
+        // Update color in real-time
+        $this->project->update([
+            'color' => $this->color,
+        ]);
 
+        session()->flash('color_success', 'Project color updated successfully.');
+
+    }
+    public function deleteProject($projectId)
+    {
+        $project = Project::find($projectId);
+        $project->delete();
+        return redirect()->route('organizations.projects', [
+            'id' => $project->team->id,
+            'organization_alias' => $project->team->alias,
+        ], 301);
+    }
     public function render()
     {
         return view('livewire.edit-project');
